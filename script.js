@@ -81,12 +81,14 @@
       menuBtn.addEventListener("click", function () {
         var open = menuBtn.getAttribute("aria-expanded") === "true";
         menuBtn.setAttribute("aria-expanded", String(!open));
+        menuBtn.setAttribute("aria-label", !open ? "Close menu" : "Open menu");
         mobileMenu.classList.toggle("is-open", !open);
         document.body.style.overflow = !open ? "hidden" : "";
       });
       mobileMenu.querySelectorAll("a").forEach(function (a) {
         a.addEventListener("click", function () {
           menuBtn.setAttribute("aria-expanded", "false");
+          menuBtn.setAttribute("aria-label", "Open menu");
           mobileMenu.classList.remove("is-open");
           document.body.style.overflow = "";
         });
@@ -355,10 +357,12 @@
         items.forEach(function (i) {
           i.classList.remove("is-open");
           i.querySelector(".faq-q").setAttribute("aria-expanded", "false");
+          i.querySelector(".faq-a").setAttribute("aria-hidden", "true");
         });
         if (!isOpen) {
           item.classList.add("is-open");
           btn.setAttribute("aria-expanded", "true");
+          item.querySelector(".faq-a").setAttribute("aria-hidden", "false");
         }
       });
     });
