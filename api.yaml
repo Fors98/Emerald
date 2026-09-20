@@ -1,0 +1,178 @@
+openapi: 3.0.3
+info:
+  title: Emerald Studio API
+  description: >
+    API contract for the Emerald Digital Studio website.
+    This specification covers only what the current front end
+    (index.html + script.js, as uploaded) actually requires.
+    No endpoint below was invented for genericity or "completeness" —
+    each one is traced to a specific piece of front-end code.
+    See the accompanying compatibility report for what was deliberately
+    left out and why.
+  version: 0.1.0
+servers:
+  - url: /api
+    description: Same-origin relative path (Spring Boot serving the API and the static site together)
+
+tags:
+  - name: Contact
+    description: The site's single interactive feature — the contact form.
+
+paths:
+  /contact:
+    post:
+      tags: [Contact]
+      summary: Submit the contact form
+      description: >
+        Evidence: `index.html` line ~393 (`<form id="contactForm">`) and
+        `script.js` `contactForm()` IIFE (~line 374-433). The form is
+        currently wired to a `setTimeout` demo instead of a real request;
+        the comment in script.js (line ~412) shows the intended shape:
+        `fetch("https://your-api.example.com/contact", { method: "POST",
+        body: JSON.stringify(Object.fromEntries(new FormData(form))) })`.
+        This endpoint replaces that placeholder.
+      operationId: submitContactForm
+      security: [] # No auth in the front end for this form — it's a public site.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactRequest'
+            examples:
+              typical:
+                value:
+                  name: "Alex Rivera"
+                  email: "alex@example.com"
+                  company: "Northwind Ltd"
+                  projectType: "Web Development"
+                  message: "We need a rebuild of our marketing site."
+      responses:
+        '201':
+          description: >
+            Message accepted. ASSUMPTION — the front end does not read
+            any field from the response; it only checks that the request
+            did not fail (see open questions). A minimal envelope is
+            proposed here so the endpoint is usable if a confirmation
+            UI is added later.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactResponse'
+        '400':
+          description: >
+            Validation failed. Field names in `errors` should match the
+            form's `name` attributes (name, email, company, projectType,
+            message) so the front end can map each error to its existing
+            `<span class="field-error" id="err-...">` element.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '429':
+          description: >
+            ASSUMPTION — not evidenced anywhere in the front end (no
+            retry/backoff/cooldown logic exists in script.js). Included
+            only as a recommended anti-spam safeguard; remove if the
+            team doesn't want it. See open questions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    ContactRequest:
+      type: object
+      description: >
+        Fields match exactly the `name` attributes of the form inputs
+        in index.html (lines 397, 402, 409, 414, 427), so that
+        `Object.fromEntries(new FormData(form))` serializes directly
+        into this shape with no front-end remapping.
+      required: [name, email, message]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          example: "Alex Rivera"
+          description: 'input#f-name — HTML "required", no other constraint client-side.'
+        email:
+          type: string
+          format: email
+          example: "alex@example.com"
+          description: >
+            input#f-email — client-side validated with regex
+            /^[^\s@]+@[^\s@]+\.[^\s@]+$/ (script.js line 400).
+            Server must re-validate; do not trust the client check.
+        company:
+          type: string
+          nullable: true
+          example: "Northwind Ltd"
+          description: 'input#f-company — optional in the HTML (no "required").'
+        projectType:
+          type: string
+          nullable: true
+          description: >
+            select#f-type — optional. ASSUMPTION: modeled as free text,
+            not a strict enum, because the option labels are marketing
+            copy ("Web Development", "UI / UX Design", "Cyber",
+            "Marketing", "DevOps", "Something else") that product may
+            change without a coordinated API version bump. If the team
+            prefers a hard enum, tighten this later.
+          example: "Web Development"
+        message:
+          type: string
+          minLength: 10
+          example: "We need a rebuild of our marketing site."
+          description: >
+            textarea#f-message — HTML "required minlength=10"
+            (index.html line 427), matched here exactly.
+
+    ContactResponse:
+      type: object
+      description: >
+        ASSUMPTION (unresolved requirement) — the current front end
+        (script.js line 428) always shows the same static success
+        string regardless of response body, so no field here is
+        actually consumed today. Shape proposed for forward
+        compatibility only.
+      properties:
+        id:
+          type: string
+          format: uuid
+        receivedAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [received]
+
+    ValidationErrorResponse:
+      type: object
+      required: [errors]
+      properties:
+        errors:
+          type: object
+          description: >
+            Map of field name -> message, keyed by the same names used
+            in the `<span class="field-error" id="err-name|err-email|
+            err-message">` elements, so the front end (once wired) can
+            do `document.getElementById('err-' + field).textContent =
+            message` directly.
+          additionalProperties:
+            type: string
+          example:
+            email: "Enter a valid email address."
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Something went wrong. Please try again."
