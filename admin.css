@@ -1,0 +1,81 @@
+/* =========================================================
+   EMERALD — admin.css   (admin.html only; builds on styles.css tokens)
+   ========================================================= */
+.admin{ min-height:100vh; }
+.admin-bar{
+  display:flex; align-items:center; justify-content:space-between; gap:1rem;
+  padding: 1rem var(--gutter); border-bottom:1px solid var(--line); background: var(--basalt);
+}
+.admin-bar-right{ display:flex; align-items:center; gap:1rem; }
+.admin-user{ color: var(--stone); font-size:.85rem; }
+.btn-sm{ padding:.5rem 1rem; font-size:.85rem; }
+.btn-danger{ border:1px solid rgba(216,106,74,.5); color:#e08a70; }
+.btn-danger:hover{ background: rgba(216,106,74,.12); }
+.muted{ color: var(--stone); font-size:.9rem; }
+code{ font-family: ui-monospace, Menlo, Consolas, monospace; font-size:.85em; color: var(--bone-dim); }
+
+.demo-banner{
+  padding:.7rem var(--gutter); font-size:.85rem; color:#241b05;
+  background: var(--c-cyber);
+}
+.demo-banner code{ color:#241b05; }
+
+.admin-main{ padding: 2rem var(--gutter) 4rem; max-width: 1100px; margin: 0 auto; }
+
+.login-card{
+  max-width: 24rem; margin: 6vh auto 0; padding: 2rem;
+  background: var(--panel); border:1px solid var(--line-strong); border-radius: var(--radius-m);
+}
+.login-card h1{ font-family: var(--font-display); font-weight:500; font-size:1.8rem; }
+.login-card form{ display:grid; gap:1rem; margin-top:1.4rem; }
+.login-card .form-status{ display:none; }
+.login-card .form-status.is-visible{ display:block; }
+
+.admin-tabs{ display:flex; flex-wrap:wrap; gap:.4rem; border-bottom:1px solid var(--line); margin-bottom:1.6rem; }
+.admin-tabs button{
+  padding:.7rem 1rem; font-size:.9rem; color: var(--stone);
+  border-bottom:2px solid transparent; margin-bottom:-1px;
+}
+.admin-tabs button:hover{ color: var(--bone); }
+.admin-tabs button[aria-selected="true"]{ color: var(--c-webdev); border-bottom-color: var(--c-webdev); }
+
+.admin-panel:focus{ outline:none; }
+.admin-panel h2{ font-family: var(--font-display); font-weight:500; font-size:1.6rem; margin-bottom:1.2rem; }
+.admin-panel h3{ font-size:1.05rem; margin: 2rem 0 .8rem; }
+
+.cards{ display:grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap:1rem; }
+.card{
+  background: var(--panel); border:1px solid var(--line); border-radius: var(--radius-m); padding:1.1rem;
+}
+.card b{ display:block; font-family: var(--font-display); font-size:2rem; font-weight:500; }
+.card span{ color: var(--stone); font-size:.82rem; }
+
+.table-wrap{ overflow-x:auto; border:1px solid var(--line); border-radius: var(--radius-m); }
+table{ width:100%; border-collapse:collapse; font-size:.9rem; }
+th, td{ text-align:left; padding:.75rem .9rem; border-bottom:1px solid var(--line); vertical-align:top; }
+th{ color: var(--stone); font-weight:600; font-size:.76rem; letter-spacing:.05em; text-transform:uppercase; background: var(--basalt); }
+tr:last-child td{ border-bottom:none; }
+td .msg{ max-width: 34ch; color: var(--bone-dim); white-space:pre-wrap; word-break:break-word; }
+td.actions{ white-space:nowrap; display:flex; gap:.5rem; }
+.empty{ padding:1.4rem; color: var(--stone); }
+.toolbar{ display:flex; gap:.8rem; align-items:center; margin-bottom:1rem; flex-wrap:wrap; }
+
+.admin select, .admin .field input, .admin .field textarea{ color: var(--bone); }
+select.inline{
+  background: rgba(255,255,255,.04); border:1px solid var(--line-strong); border-radius: var(--radius-s);
+  padding:.4rem .5rem; color: var(--bone); font-size:.85rem;
+}
+select.inline option{ background: var(--panel); }
+
+.edit-form{
+  display:grid; gap:1rem; margin-top:1rem; padding:1.4rem;
+  background: var(--panel); border:1px solid var(--line-strong); border-radius: var(--radius-m);
+}
+.edit-form .row{ display:flex; gap:.8rem; flex-wrap:wrap; align-items:center; }
+.stats-form{ display:grid; gap:.8rem; max-width: 34rem; }
+.stats-form .srow{ display:grid; grid-template-columns: 1fr 6rem; gap:.6rem; }
+.flash{ margin: 0 0 1rem; }
+.flash.form-status{ display:block; }
+@media (max-width:600px){
+  .stats-form .srow{ grid-template-columns: 1fr; }
+}

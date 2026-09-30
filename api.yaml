@@ -1,0 +1,931 @@
+openapi: 3.0.3
+info:
+  title: Emerald Studio API
+  version: 0.2.0
+  description: >
+    API contract for the Emerald Digital Studio website. This is the single
+    source of truth shared by the front end and the Spring Boot back end.
+
+
+    **v0.2.0 (this file)** keeps `POST /contact` exactly as implemented and
+    approved in v0.1.0 (ContactController), and adds 19 endpoints: five public
+    read endpoints for the site's dynamic sections, the newsletter sign-up,
+    staff authentication, and the admin dashboard (`admin.html`).
+
+
+    Rules for changing this file: change the contract first, get it reviewed,
+    then build or change the controller. Do not add an endpoint that no
+    front-end code uses.
+
+
+    Conventions: list endpoints return an envelope `{ "items": [...] }`
+    (admin lists add paging fields); validation failures return 400 with
+    `{ "errors": { "<field>": "<message>" } }`; every other error returns
+    `{ "message": "..." }`; all ids are UUIDs; timestamps are ISO-8601 UTC.
+servers:
+  - url: /api
+    description: Same-origin relative path (Spring Boot serving the API and the static site together, `server.servlet.context-path=/api`)
+
+tags:
+  - name: Contact
+    description: The public contact form (implemented in v0.1.0).
+  - name: Content
+    description: Public, read-only content for the dynamic sections of index.html.
+  - name: Newsletter
+    description: Footer newsletter sign-up.
+  - name: Auth
+    description: Staff sign-in for the admin dashboard.
+  - name: Admin
+    description: Staff-only endpoints used by admin.html. Every operation requires a bearer token.
+
+paths:
+  /contact:
+    post:
+      tags: [Contact]
+      summary: Submit the contact form
+      description: >
+        Evidence: `index.html` line ~393 (`<form id="contactForm">`) and
+        `script.js` `contactForm()` IIFE (~line 374-433). The form is
+        currently wired to a `setTimeout` demo instead of a real request;
+        the comment in script.js (line ~412) shows the intended shape:
+        `fetch("https://your-api.example.com/contact", { method: "POST",
+        body: JSON.stringify(Object.fromEntries(new FormData(form))) })`.
+        This endpoint replaces that placeholder.
+      operationId: submitContactForm
+      security: [] # No auth in the front end for this form — it's a public site.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactRequest'
+            examples:
+              typical:
+                value:
+                  name: "Alex Rivera"
+                  email: "alex@example.com"
+                  company: "Northwind Ltd"
+                  projectType: "Web Development"
+                  message: "We need a rebuild of our marketing site."
+      responses:
+        '201':
+          description: >
+            Message accepted. ASSUMPTION — the front end does not read
+            any field from the response; it only checks that the request
+            did not fail (see open questions). A minimal envelope is
+            proposed here so the endpoint is usable if a confirmation
+            UI is added later.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactResponse'
+        '400':
+          description: >
+            Validation failed. Field names in `errors` should match the
+            form's `name` attributes (name, email, company, projectType,
+            message) so the front end can map each error to its existing
+            `<span class="field-error" id="err-...">` element.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '429':
+          description: >
+            ASSUMPTION — not evidenced anywhere in the front end (no
+            retry/backoff/cooldown logic exists in script.js). Included
+            only as a recommended anti-spam safeguard; remove if the
+            team doesn't want it. See open questions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ===================================================================
+  # PUBLIC CONTENT  (index.html — dynamic sections)
+  # Each returns { items: [...] } sorted by `position`. If a request
+  # fails, index.html keeps its static fallback markup.
+  # ===================================================================
+  /services:
+    get:
+      tags: [Content]
+      summary: List services
+      description: >
+        Feeds the "Services" section (`#servicesList`). `slug` becomes the
+        element id of each block (`#web-dev`, ...) which the hero crystals
+        and the scroll-spy link to, so the five original slugs must be kept.
+      operationId: listServices
+      security: []
+      responses:
+        '200':
+          description: All services, ordered by position.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/Service' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /projects:
+    get:
+      tags: [Content]
+      summary: List selected work
+      description: Feeds the "Selected work" grid (`#workGrid`).
+      operationId: listProjects
+      security: []
+      responses:
+        '200':
+          description: All projects, ordered by position.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/Project' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /testimonials:
+    get:
+      tags: [Content]
+      summary: List testimonials
+      description: Feeds the testimonials grid (`#testimonialsGrid`).
+      operationId: listTestimonials
+      security: []
+      responses:
+        '200':
+          description: All testimonials, ordered by position.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/Testimonial' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /faqs:
+    get:
+      tags: [Content]
+      summary: List FAQ entries
+      description: Feeds the FAQ accordion (`#faqList`).
+      operationId: listFaqs
+      security: []
+      responses:
+        '200':
+          description: All FAQ entries, ordered by position.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/Faq' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /stats:
+    get:
+      tags: [Content]
+      summary: Get the studio stats
+      description: >
+        Feeds the count-up numbers in the About section (`#statsRow`).
+        Returned in display order.
+      operationId: getStats
+      security: []
+      responses:
+        '200':
+          description: The stats.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatsList' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  # ===================================================================
+  # NEWSLETTER
+  # ===================================================================
+  /newsletter/subscribe:
+    post:
+      tags: [Newsletter]
+      summary: Subscribe an email address
+      description: >
+        Footer form (`#newsletterForm`). Idempotent: subscribing an address
+        that is already on the list is not an error and returns 200 with
+        `status: already_subscribed`. Emails are stored lower-cased.
+      operationId: subscribeNewsletter
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NewsletterRequest' }
+            examples:
+              typical:
+                value: { email: "reader@example.com" }
+      responses:
+        '201':
+          description: New subscriber added.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NewsletterResponse' }
+        '200':
+          description: Address was already subscribed.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NewsletterResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '429':
+          description: Too many attempts. Recommended anti-spam safeguard, same as the contact form.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  # ===================================================================
+  # AUTH  (admin.html sign-in)
+  # ===================================================================
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Sign in as staff
+      description: >
+        Returns a short-lived JWT. The admin page sends it as
+        `Authorization: Bearer <token>` and keeps it in sessionStorage.
+        Failed attempts should be rate-limited and must not reveal whether
+        the email exists (always the same 401 message).
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: Signed in.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LoginResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401':
+          description: Wrong email or password.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '429':
+          description: Too many failed attempts.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Sign out
+      description: >
+        Invalidates the current token server-side (e.g. deny-list until it
+        expires). The front end drops the token locally regardless of the result.
+      operationId: logout
+      security: [{ bearerAuth: [] }]
+      responses:
+        '204': { description: Signed out. }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Get the signed-in user
+      description: Used on page load to check that a stored token is still valid.
+      operationId: getCurrentUser
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: The current user.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  # ===================================================================
+  # ADMIN — overview, messages, subscribers
+  # ===================================================================
+  /admin/dashboard:
+    get:
+      tags: [Admin]
+      summary: Dashboard counters
+      description: The numbers on the admin "Overview" tab.
+      operationId: getDashboard
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Counters.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Dashboard' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /admin/contacts:
+    get:
+      tags: [Admin]
+      summary: List contact-form submissions
+      description: >
+        Messages stored by `POST /contact`, newest first.
+        NOTE FOR BACK END: the existing `Contact` entity needs a `status`
+        column (default `received`) for this and the PATCH below.
+      operationId: listContacts
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - name: status
+          in: query
+          required: false
+          description: Only return messages with this status.
+          schema: { $ref: '#/components/schemas/ContactStatus' }
+      responses:
+        '200':
+          description: A page of messages.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ContactPage' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /admin/contacts/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    patch:
+      tags: [Admin]
+      summary: Change a message's status
+      operationId: updateContactStatus
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { $ref: '#/components/schemas/ContactStatus' }
+            examples:
+              markRead:
+                value: { status: read }
+      responses:
+        '200':
+          description: Updated message.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ContactRecord' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/ServerError' }
+    delete:
+      tags: [Admin]
+      summary: Delete a message
+      operationId: deleteContact
+      security: [{ bearerAuth: [] }]
+      responses:
+        '204': { description: Deleted. }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /admin/subscribers:
+    get:
+      tags: [Admin]
+      summary: List newsletter subscribers
+      operationId: listSubscribers
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: A page of subscribers, newest first.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SubscriberPage' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /admin/subscribers/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    delete:
+      tags: [Admin]
+      summary: Remove a subscriber
+      operationId: deleteSubscriber
+      security: [{ bearerAuth: [] }]
+      responses:
+        '204': { description: Removed. }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  # ===================================================================
+  # ADMIN — content management
+  # One path family manages the four content collections. {collection}
+  # selects the body/response schema:
+  #   services -> Service / ServiceInput      projects     -> Project / ProjectInput
+  #   testimonials -> Testimonial / TestimonialInput   faqs -> Faq / FaqInput
+  # (If the team prefers explicit paths per collection, this becomes 12
+  #  operations instead of 3; the schemas do not change.)
+  # ===================================================================
+  /admin/{collection}:
+    parameters:
+      - $ref: '#/components/parameters/Collection'
+    post:
+      tags: [Admin]
+      summary: Create a service, project, testimonial or FAQ entry
+      operationId: createContentItem
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/ServiceInput'
+                - $ref: '#/components/schemas/ProjectInput'
+                - $ref: '#/components/schemas/TestimonialInput'
+                - $ref: '#/components/schemas/FaqInput'
+            examples:
+              faq:
+                summary: POST /admin/faqs
+                value: { question: "Do you work with startups?", answer: "Yes, regularly.", position: 7 }
+      responses:
+        '201':
+          description: Created. The body is the stored item (Service, Project, Testimonial or Faq).
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Service'
+                  - $ref: '#/components/schemas/Project'
+                  - $ref: '#/components/schemas/Testimonial'
+                  - $ref: '#/components/schemas/Faq'
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404':
+          description: Unknown collection, or a slug conflict is reported as 400 on the `slug` field instead.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /admin/{collection}/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Collection'
+      - $ref: '#/components/parameters/Id'
+    put:
+      tags: [Admin]
+      summary: Replace a service, project, testimonial or FAQ entry
+      description: Full replacement. For services, `slug` is immutable and ignored if sent.
+      operationId: updateContentItem
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/ServiceInput'
+                - $ref: '#/components/schemas/ProjectInput'
+                - $ref: '#/components/schemas/TestimonialInput'
+                - $ref: '#/components/schemas/FaqInput'
+      responses:
+        '200':
+          description: Updated item.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Service'
+                  - $ref: '#/components/schemas/Project'
+                  - $ref: '#/components/schemas/Testimonial'
+                  - $ref: '#/components/schemas/Faq'
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/ServerError' }
+    delete:
+      tags: [Admin]
+      summary: Delete a service, project, testimonial or FAQ entry
+      operationId: deleteContentItem
+      security: [{ bearerAuth: [] }]
+      responses:
+        '204': { description: Deleted. }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /admin/stats:
+    put:
+      tags: [Admin]
+      summary: Replace the studio stats
+      description: >
+        Replaces the whole list (the four numbers in the About section).
+        Stats are a single fixed list, not a collection with ids.
+      operationId: updateStats
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/StatsList' }
+      responses:
+        '200':
+          description: Stored stats.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatsList' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 'Token from `POST /auth/login`, sent as `Authorization: Bearer <token>`.'
+
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    Collection:
+      name: collection
+      in: path
+      required: true
+      description: Which content collection to manage.
+      schema:
+        type: string
+        enum: [services, projects, testimonials, faqs]
+    Page:
+      name: page
+      in: query
+      required: false
+      description: Zero-based page index.
+      schema: { type: integer, minimum: 0, default: 0 }
+    Size:
+      name: size
+      in: query
+      required: false
+      schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+
+  responses:
+    ValidationError:
+      description: >
+        Validation failed. Same shape as the contact form: field name -> message.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ValidationErrorResponse' }
+    Unauthorized:
+      description: Missing, invalid or expired token.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    NotFound:
+      description: No item with that id.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    ServerError:
+      description: Unexpected server error.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  schemas:
+    ContactRequest:
+      type: object
+      description: >
+        Fields match exactly the `name` attributes of the form inputs
+        in index.html (lines 397, 402, 409, 414, 427), so that
+        `Object.fromEntries(new FormData(form))` serializes directly
+        into this shape with no front-end remapping.
+      required: [name, email, message]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          example: "Alex Rivera"
+          description: 'input#f-name — HTML "required", no other constraint client-side.'
+        email:
+          type: string
+          format: email
+          example: "alex@example.com"
+          description: >
+            input#f-email — client-side validated with regex
+            /^[^\s@]+@[^\s@]+\.[^\s@]+$/ (script.js line 400).
+            Server must re-validate; do not trust the client check.
+        company:
+          type: string
+          nullable: true
+          example: "Northwind Ltd"
+          description: 'input#f-company — optional in the HTML (no "required").'
+        projectType:
+          type: string
+          nullable: true
+          description: >
+            select#f-type — optional. ASSUMPTION: modeled as free text,
+            not a strict enum, because the option labels are marketing
+            copy ("Web Development", "UI / UX Design", "Cyber",
+            "Marketing", "DevOps", "Something else") that product may
+            change without a coordinated API version bump. If the team
+            prefers a hard enum, tighten this later.
+          example: "Web Development"
+        message:
+          type: string
+          minLength: 10
+          example: "We need a rebuild of our marketing site."
+          description: >
+            textarea#f-message — HTML "required minlength=10"
+            (index.html line 427), matched here exactly.
+
+    ContactResponse:
+      type: object
+      description: >
+        ASSUMPTION (unresolved requirement) — the current front end
+        (script.js line 428) always shows the same static success
+        string regardless of response body, so no field here is
+        actually consumed today. Shape proposed for forward
+        compatibility only.
+      properties:
+        id:
+          type: string
+          format: uuid
+        receivedAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [received]
+
+    ValidationErrorResponse:
+      type: object
+      required: [errors]
+      properties:
+        errors:
+          type: object
+          description: >
+            Map of field name -> message, keyed by the same names used
+            in the `<span class="field-error" id="err-name|err-email|
+            err-message">` elements, so the front end (once wired) can
+            do `document.getElementById('err-' + field).textContent =
+            message` directly.
+          additionalProperties:
+            type: string
+          example:
+            email: "Enter a valid email address."
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Something went wrong. Please try again."
+
+    # ---------------- v0.2.0: public content ----------------
+    Service:
+      type: object
+      required: [id, slug, title, description, tags, position]
+      properties:
+        id: { type: string, format: uuid }
+        slug:
+          type: string
+          pattern: '^[a-z0-9]+(-[a-z0-9]+)*$'
+          description: Used as the HTML element id of the block and as the hero crystal's scroll target. Immutable.
+          example: web-dev
+        title: { type: string, example: "Web Development" }
+        description: { type: string }
+        tags:
+          type: array
+          items: { type: string }
+          example: ["Marketing sites", "Performance"]
+        position:
+          type: integer
+          minimum: 1
+          description: Display order; the "01", "02" index shown on the page is derived from the order, not stored.
+    ServiceInput:
+      type: object
+      required: [title, description, tags, position]
+      properties:
+        slug:
+          type: string
+          pattern: '^[a-z0-9]+(-[a-z0-9]+)*$'
+          description: Required on create (400 if missing or already used); ignored on update.
+        title: { type: string, minLength: 1, maxLength: 100 }
+        description: { type: string, minLength: 1, maxLength: 1000 }
+        tags:
+          type: array
+          maxItems: 12
+          items: { type: string, minLength: 1, maxLength: 40 }
+        position: { type: integer, minimum: 1 }
+
+    Project:
+      type: object
+      required: [id, title, category, summary, tags, position]
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string, example: Aurum }
+        category: { type: string, example: Fintech }
+        summary: { type: string }
+        tags:
+          type: array
+          items: { type: string }
+          example: ["Web Dev", "Cyber"]
+        position: { type: integer, minimum: 1 }
+    ProjectInput:
+      type: object
+      required: [title, category, summary, tags, position]
+      properties:
+        title: { type: string, minLength: 1, maxLength: 100 }
+        category: { type: string, minLength: 1, maxLength: 60 }
+        summary: { type: string, minLength: 1, maxLength: 500 }
+        tags:
+          type: array
+          maxItems: 6
+          items: { type: string, minLength: 1, maxLength: 40 }
+        position: { type: integer, minimum: 1 }
+
+    Testimonial:
+      type: object
+      required: [id, quote, authorName, authorRole, position]
+      properties:
+        id: { type: string, format: uuid }
+        quote: { type: string }
+        authorName: { type: string, example: Rina Kessler }
+        authorRole: { type: string, example: "Head of Product, Northfield Bank" }
+        position: { type: integer, minimum: 1 }
+    TestimonialInput:
+      type: object
+      required: [quote, authorName, authorRole, position]
+      properties:
+        quote: { type: string, minLength: 1, maxLength: 600 }
+        authorName: { type: string, minLength: 1, maxLength: 100 }
+        authorRole: { type: string, minLength: 1, maxLength: 150 }
+        position: { type: integer, minimum: 1 }
+
+    Faq:
+      type: object
+      required: [id, question, answer, position]
+      properties:
+        id: { type: string, format: uuid }
+        question: { type: string }
+        answer: { type: string }
+        position: { type: integer, minimum: 1 }
+    FaqInput:
+      type: object
+      required: [question, answer, position]
+      properties:
+        question: { type: string, minLength: 1, maxLength: 200 }
+        answer: { type: string, minLength: 1, maxLength: 1500 }
+        position: { type: integer, minimum: 1 }
+
+    StatItem:
+      type: object
+      required: [key, label, value]
+      properties:
+        key:
+          type: string
+          description: Stable identifier (e.g. projects, disciplines, countries, years). Never shown.
+          example: projects
+        label: { type: string, minLength: 1, maxLength: 60, example: "Projects shipped" }
+        value: { type: integer, minimum: 0, example: 47 }
+    StatsList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          minItems: 1
+          maxItems: 8
+          items: { $ref: '#/components/schemas/StatItem' }
+
+    # ---------------- v0.2.0: newsletter ----------------
+    NewsletterRequest:
+      type: object
+      required: [email]
+      properties:
+        email: { type: string, format: email, maxLength: 254 }
+    NewsletterResponse:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [subscribed, already_subscribed]
+
+    # ---------------- v0.2.0: auth ----------------
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, format: password, minLength: 1 }
+    LoginResponse:
+      type: object
+      required: [accessToken, tokenType, expiresIn, user]
+      properties:
+        accessToken: { type: string }
+        tokenType: { type: string, enum: [Bearer] }
+        expiresIn: { type: integer, description: 'Lifetime in seconds.', example: 3600 }
+        user: { $ref: '#/components/schemas/User' }
+    User:
+      type: object
+      required: [email, role]
+      properties:
+        email: { type: string, format: email }
+        role: { type: string, enum: [ADMIN] }
+
+    # ---------------- v0.2.0: admin ----------------
+    Dashboard:
+      type: object
+      required: [contactsTotal, contactsNew, subscribersTotal, services, projects, testimonials, faqs]
+      properties:
+        contactsTotal: { type: integer, minimum: 0 }
+        contactsNew: { type: integer, minimum: 0, description: 'Messages with status `received`.' }
+        subscribersTotal: { type: integer, minimum: 0 }
+        services: { type: integer, minimum: 0 }
+        projects: { type: integer, minimum: 0 }
+        testimonials: { type: integer, minimum: 0 }
+        faqs: { type: integer, minimum: 0 }
+
+    ContactStatus:
+      type: string
+      enum: [received, read, replied, archived]
+      description: >
+        Workflow status of a stored message. `received` is what
+        `POST /contact` sets (and what ContactResponse.status returns).
+    ContactRecord:
+      type: object
+      required: [id, name, email, message, status, receivedAt]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        email: { type: string, format: email }
+        company: { type: string, nullable: true }
+        projectType: { type: string, nullable: true }
+        message: { type: string }
+        status: { $ref: '#/components/schemas/ContactStatus' }
+        receivedAt: { type: string, format: date-time }
+    ContactPage:
+      allOf:
+        - $ref: '#/components/schemas/PageMeta'
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items: { $ref: '#/components/schemas/ContactRecord' }
+
+    Subscriber:
+      type: object
+      required: [id, email, subscribedAt]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        subscribedAt: { type: string, format: date-time }
+    SubscriberPage:
+      allOf:
+        - $ref: '#/components/schemas/PageMeta'
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items: { $ref: '#/components/schemas/Subscriber' }
+
+    PageMeta:
+      type: object
+      required: [page, size, totalItems, totalPages]
+      properties:
+        page: { type: integer, minimum: 0 }
+        size: { type: integer, minimum: 1 }
+        totalItems: { type: integer, minimum: 0 }
+        totalPages: { type: integer, minimum: 0 }

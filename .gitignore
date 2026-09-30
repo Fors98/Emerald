@@ -1,0 +1,35 @@
+# --- Secrets / environment ---
+.env
+.env.*
+application-local.yml
+application-local.properties
+*.pem
+*.key
+*.p12
+*credentials*
+
+# --- Java / Spring Boot (once the backend is added) ---
+target/
+build/
+*.class
+*.jar
+!*/wrapper/*.jar
+HELP.md
+.mvn/
+!.mvn/wrapper/maven-wrapper.jar
+.gradle/
+
+# --- IDE ---
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# --- OS junk ---
+.DS_Store
+Thumbs.db
+
+# --- Logs ---
+*.log
