@@ -7,18 +7,22 @@ import jakarta.validation.constraints.Size;
 public class ContactRequest {
 
     @NotBlank
+    @Size(max = 255)
     private String name;
 
     @NotBlank
     @Email
+    @Size(max = 254)
     private String email;
 
+    @Size(max = 255)
     private String company;
 
+    @Size(max = 255)
     private String projectType;
 
     @NotBlank
-    @Size(min = 10)
+    @Size(min = 10, max = 5000)
     private String message;
 
     public String getName() {

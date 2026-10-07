@@ -370,20 +370,20 @@
 
   /* ---------------------------------------------------------
      CONTACT FORM
-     Client-side validation + a clearly-labelled demo submit.
-     Replace the block marked below with a real fetch() call
-     to your backend or form endpoint (e.g. Formspree, a
-     serverless function, or your own API) to go live.
+     POST /api/contact
   --------------------------------------------------------- */
   (function contactForm() {
     var form = document.getElementById("contactForm");
     if (!form) return;
+
     var status = document.getElementById("formStatus");
+    var submitBtn = form.querySelector(".btn-primary");
 
     function setError(fieldId, errId, message) {
       var field = document.getElementById(fieldId);
       var err = document.getElementById(errId);
       var wrap = field.closest(".field");
+
       if (message) {
         wrap.classList.add("has-error");
         if (err) err.textContent = message;
@@ -391,48 +391,181 @@
         wrap.classList.remove("has-error");
         if (err) err.textContent = "";
       }
+
       return !message;
+    }
+
+    function clearErrors() {
+      setError("f-name", "err-name", "");
+      setError("f-email", "err-email", "");
+      setError("f-company", "err-company", "");
+      setError("f-type", "err-type", "");
+      setError("f-message", "err-message", "");
+    }
+
+    function showStatus(message, isError) {
+      status.textContent = message;
+      status.classList.toggle("is-error", !!isError);
+      status.classList.add("is-visible");
     }
 
     form.addEventListener("submit", function (e) {
       e.preventDefault();
-      status.classList.remove("is-visible");
 
-      var name = document.getElementById("f-name").value.trim();
-      var email = document.getElementById("f-email").value.trim();
-      var message = document.getElementById("f-message").value.trim();
+      status.classList.remove("is-visible", "is-error");
+      clearErrors();
+
+      var payload = {
+        name: document.getElementById("f-name").value.trim(),
+        email: document.getElementById("f-email").value.trim(),
+        company: document.getElementById("f-company").value.trim(),
+        projectType: document.getElementById("f-type").value.trim(),
+        message: document.getElementById("f-message").value.trim()
+      };
+
       var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-      var validName = setError("f-name", "err-name", name ? "" : "Tell us your name.");
-      var validEmail = setError("f-email", "err-email", emailPattern.test(email) ? "" : "Enter a valid email address.");
-      var validMessage = setError("f-message", "err-message", message.length >= 10 ? "" : "A few more details would help (10+ characters).");
+      var validName = setError(
+        "f-name",
+        "err-name",
+        payload.name ? "" : "Tell us your name."
+      );
 
-      if (!(validName && validEmail && validMessage)) return;
+      var validEmail = setError(
+        "f-email",
+        "err-email",
+        emailPattern.test(payload.email)
+          ? ""
+          : "Enter a valid email address."
+      );
 
-      /* ---------------------------------------------------
-         DEMO SUBMIT — no backend is connected in this build.
-         To go live, replace this block with something like:
+      var validCompany = setError(
+        "f-company",
+        "err-company",
+        payload.company.length <= 255
+          ? ""
+          : "Company name must be 255 characters or fewer."
+      );
 
-         fetch("https://your-api.example.com/contact", {
-           method: "POST",
-           headers: { "Content-Type": "application/json" },
-           body: JSON.stringify(Object.fromEntries(new FormData(form)))
-         })
-           .then(function (res) { ... })
-           .catch(function (err) { ... });
-      --------------------------------------------------- */
-      var submitBtn = form.querySelector(".btn-primary");
+      var validProjectType = setError(
+        "f-type",
+        "err-type",
+        payload.projectType.length <= 255
+          ? ""
+          : "Project type must be 255 characters or fewer."
+      );
+
+      var validMessage = setError(
+        "f-message",
+        "err-message",
+        payload.message.length >= 10 && payload.message.length <= 5000
+          ? ""
+          : payload.message.length < 10
+            ? "A few more details would help (10+ characters)."
+            : "Message must be 5000 characters or fewer."
+      );
+
+      if (!(validName && validEmail && validCompany && validProjectType && validMessage)) return;
+
+      if (!payload.company) delete payload.company;
+      if (!payload.projectType) delete payload.projectType;
+
       var originalLabel = submitBtn.textContent;
       submitBtn.textContent = "Sending…";
       submitBtn.disabled = true;
 
-      window.setTimeout(function () {
-        submitBtn.textContent = originalLabel;
-        submitBtn.disabled = false;
-        status.textContent = "Message captured. This demo form isn't connected to a backend yet — wire it up to your email service or API to start receiving these for real.";
-        status.classList.add("is-visible");
-        form.reset();
-      }, 600);
+      fetch((window.EMERALD_API_BASE || document.querySelector('meta[name="emerald-api-base"]')?.getAttribute("content") || "/api") + "/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify(payload)
+      })
+        .then(function (response) {
+          return response.text().then(function (text) {
+            var data = null;
+
+            if (text) {
+              try {
+                data = JSON.parse(text);
+              } catch (ignore) {}
+            }
+
+            if (!response.ok) {
+              var error = new Error("HTTP " + response.status);
+              error.status = response.status;
+              error.data = data;
+              throw error;
+            }
+
+            return data;
+          });
+        })
+        .then(function () {
+          showStatus(
+            "Thanks — your message is in. We'll reply within two business days.",
+            false
+          );
+          form.reset();
+        })
+        .catch(function (error) {
+          if (
+            error.status === 400 &&
+            error.data &&
+            error.data.errors
+          ) {
+            Object.keys(error.data.errors).forEach(function (field) {
+              var fieldIds = {
+                name: "f-name",
+                email: "f-email",
+                company: "f-company",
+                projectType: "f-type",
+                message: "f-message"
+              };
+
+              var errorIds = {
+                name: "err-name",
+                email: "err-email",
+                company: "err-company",
+                projectType: "err-type",
+                message: "err-message"
+              };
+
+              if (fieldIds[field] && errorIds[field]) {
+                setError(
+                  fieldIds[field],
+                  errorIds[field],
+                  error.data.errors[field]
+                );
+              }
+            });
+
+            showStatus(
+              "Please fix the highlighted fields and try again.",
+              true
+            );
+          } else if (error.status === 415) {
+            showStatus(
+              "We couldn't send the message in the expected format. Please try again.",
+              true
+            );
+          } else if (error.status >= 500) {
+            showStatus(
+              "Something went wrong on our side. Please try again.",
+              true
+            );
+          } else {
+            showStatus(
+              "We couldn't reach the server. Please try again shortly, or email us directly.",
+              true
+            );
+          }
+        })
+        .finally(function () {
+          submitBtn.textContent = originalLabel;
+          submitBtn.disabled = false;
+        });
     });
   })();
 

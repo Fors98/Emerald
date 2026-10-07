@@ -18,7 +18,7 @@
 
 The website uses HTML, CSS and vanilla JavaScript.
 
-The contact form currently performs frontend validation and displays a demo success state. It is not yet wired to the backend endpoint.
+The contact form performs client-side validation and submits JSON to the backend contact endpoint. In local development, the frontend runs on port 3000 and the backend runs on port 8080.
 
 ## Backend
 
@@ -65,7 +65,7 @@ cd backend
 mvn clean test
 ```
 
-API verification is documented in `tests.md` . The current tests cover successful contact submission, validation errors, missing required fields and database persistence.
+API verification is documented in `tests.md` . The automated backend regression suite contains 10 tests covering successful submission, validation failures, malformed JSON, unsupported media types, strict JSON typing, null handling, root JSON types and HTTP method rejection. Broader API, persistence, security and browser verification is documented in `tests.md`.
 
 ## API contract
 

@@ -471,7 +471,7 @@
           <div class="field">
             <label for="f-company">Company</label>
             <input type="text" id="f-company" name="company" autocomplete="organization">
-            <span class="field-error"></span>
+            <span class="field-error" id="err-company"></span>
           </div>
           <div class="field">
             <label for="f-type">Project type</label>
@@ -484,6 +484,7 @@
               <option>DevOps</option>
               <option>Something else</option>
             </select>
+            <span class="field-error" id="err-type"></span>
           </div>
         </div>
         <div class="field">
@@ -493,7 +494,7 @@
         </div>
         <div class="form-submit">
           <button type="submit" class="btn btn-primary">Send message</button>
-          <span class="form-note">This is a front-end demo — no message is actually sent until this form is wired to a backend endpoint. See <code>script.js</code>.</span>
+          <span class="form-note">Your message will be sent securely to our team.</span>
         </div>
         <div class="form-status" id="formStatus" role="status" aria-live="polite"></div>
       </form>

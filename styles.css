@@ -748,6 +748,7 @@ section{ position: relative; }
   border:1px solid rgba(34,192,138,.35); color: var(--bone); font-size:.9rem; display:none;
 }
 .form-status.is-visible{ display:block; }
+.form-status.is-error{ background:rgba(216,106,74,.1); border-color:rgba(216,106,74,.35); }
 
 /* =========================================================
    FOOTER

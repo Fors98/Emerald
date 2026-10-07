@@ -26,11 +26,9 @@ paths:
       description: >
         Evidence: `index.html` line ~393 (`<form id="contactForm">`) and
         `script.js` `contactForm()` IIFE (~line 374-433). The form is
-        currently wired to a `setTimeout` demo instead of a real request;
-        the comment in script.js (line ~412) shows the intended shape:
-        `fetch("https://your-api.example.com/contact", { method: "POST",
-        body: JSON.stringify(Object.fromEntries(new FormData(form))) })`.
-        This endpoint replaces that placeholder.
+        the contact form submits JSON to this endpoint using `fetch()`.
+        The frontend reads the HTTP status and response body; successful
+        submissions display the site's confirmation message.
       operationId: submitContactForm
       security: [] # No auth in the front end for this form — it's a public site.
       requestBody:
@@ -50,11 +48,10 @@ paths:
       responses:
         '201':
           description: >
-            Message accepted. ASSUMPTION — the front end does not read
-            any field from the response; it only checks that the request
-            did not fail (see open questions). A minimal envelope is
-            proposed here so the endpoint is usable if a confirmation
-            UI is added later.
+            Message accepted. The backend returns a JSON confirmation
+            envelope containing the submission id, receipt timestamp,
+            and status. The frontend currently uses the successful HTTP
+            response to complete the submission flow.
           content:
             application/json:
               schema:
@@ -69,12 +66,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationErrorResponse'
-        '429':
-          description: >
-            ASSUMPTION — not evidenced anywhere in the front end (no
-            retry/backoff/cooldown logic exists in script.js). Included
-            only as a recommended anti-spam safeguard; remove if the
-            team doesn't want it. See open questions.
+        '415':
+          description: Unsupported media type.
           content:
             application/json:
               schema:
@@ -91,32 +84,35 @@ components:
     ContactRequest:
       type: object
       description: >
-        Fields match exactly the `name` attributes of the form inputs
-        in index.html (lines 397, 402, 409, 414, 427), so that
-        `Object.fromEntries(new FormData(form))` serializes directly
-        into this shape with no front-end remapping.
+        Fields match the `name` attributes of the contact form inputs
+        in index.html. The frontend explicitly builds this JSON payload
+        before submitting it; the backend validates every field server-side.
       required: [name, email, message]
       properties:
         name:
           type: string
           minLength: 1
+          maxLength: 255
           example: "Alex Rivera"
           description: 'input#f-name — HTML "required", no other constraint client-side.'
         email:
           type: string
           format: email
+          maxLength: 254
           example: "alex@example.com"
           description: >
             input#f-email — client-side validated with regex
-            /^[^\s@]+@[^\s@]+\.[^\s@]+$/ (script.js line 400).
+            /^[^\s@]+@[^\s@]+\.[^\s@]+$/.
             Server must re-validate; do not trust the client check.
         company:
           type: string
+          maxLength: 255
           nullable: true
           example: "Northwind Ltd"
           description: 'input#f-company — optional in the HTML (no "required").'
         projectType:
           type: string
+          maxLength: 255
           nullable: true
           description: >
             select#f-type — optional. ASSUMPTION: modeled as free text,
@@ -129,19 +125,17 @@ components:
         message:
           type: string
           minLength: 10
+          maxLength: 5000
           example: "We need a rebuild of our marketing site."
           description: >
-            textarea#f-message — HTML "required minlength=10"
-            (index.html line 427), matched here exactly.
+            textarea#f-message — HTML "required minlength=10",
+            matched by the server-side validation.
 
     ContactResponse:
       type: object
       description: >
-        ASSUMPTION (unresolved requirement) — the current front end
-        (script.js line 428) always shows the same static success
-        string regardless of response body, so no field here is
-        actually consumed today. Shape proposed for forward
-        compatibility only.
+        JSON confirmation returned by the backend after a successful
+        contact submission.
       properties:
         id:
           type: string
@@ -162,8 +156,8 @@ components:
           description: >
             Map of field name -> message, keyed by the same names used
             in the `<span class="field-error" id="err-name|err-email|
-            err-message">` elements, so the front end (once wired) can
-            do `document.getElementById('err-' + field).textContent =
+            err-message">` elements, allowing the frontend to map
+            returned field errors to the corresponding form fields.
             message` directly.
           additionalProperties:
             type: string
