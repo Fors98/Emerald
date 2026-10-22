@@ -31,7 +31,7 @@ The API base defaults to `/api` (same origin). To point at another origin during
 
 The backend uses Java 21, Spring Boot 3.5.6, Spring Web, Spring Validation, Spring Data JPA, PostgreSQL and Maven.
 
-Implemented so far: `POST /api/contact`. The full contract (20 operations) is in `api.yaml`; the remaining controllers are still to be built against it.
+Implemented so far: `POST /api/contact` and the admin authentication endpoints `POST /api/auth/login`, `/api/auth/refresh`, `/api/auth/logout` and `GET /api/auth/me`. The full contract (20 operations) is in `api.yaml`; the remaining controllers are still to be built against it.
 
 Build fields:
 - `name` — required
@@ -75,3 +75,22 @@ API verification is documented in `tests.md` . The current tests cover successfu
 ## API contract
 
 `api.yaml` (v0.2.0) is the reference for the public and admin API. Change the contract first, get it reviewed, then build or change the controller.
+
+
+## Admin authentication
+
+Package `com.emerald.backend.auth` (Spring Security, Argon2id, short-lived JWT access tokens, rotating refresh tokens in an HttpOnly cookie).
+
+Required environment variables (the app refuses to start without the first two):
+
+```
+EMERALD_AUTH_JWT_SECRET=<openssl rand -base64 48>
+EMERALD_AUTH_ALLOWED_ORIGINS=https://your-site.example
+# first start only, then remove:
+EMERALD_AUTH_BOOTSTRAP_EMAIL=you@example.com
+EMERALD_AUTH_BOOTSTRAP_PASSWORD=<at least 14 characters>
+```
+
+Local development over plain HTTP: copy `src/main/resources/application-local.properties.example` to `application-local.properties` and run `mvn spring-boot:run -Dspring-boot.run.profiles=local`.
+
+Auth tests run on in-memory H2 (`mvn clean test`).

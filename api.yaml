@@ -263,10 +263,13 @@ paths:
       tags: [Auth]
       summary: Sign in as staff
       description: >
-        Returns a short-lived JWT. The admin page sends it as
-        `Authorization: Bearer <token>` and keeps it in sessionStorage.
-        Failed attempts should be rate-limited and must not reveal whether
-        the email exists (always the same 401 message).
+        Returns a short-lived (10 min) access JWT. The admin page sends it as
+        `Authorization: Bearer <token>`. The response also sets the refresh
+        token as an HttpOnly, Secure, SameSite=Strict cookie scoped to
+        `/api/auth`; the refresh token never appears in the body.
+        Failed attempts are rate-limited per client address (429) and the
+        account is temporarily locked after repeated failures. Unknown email,
+        wrong password and locked account all return the same 401 message.
       operationId: login
       security: []
       requestBody:
@@ -293,18 +296,59 @@ paths:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
         '500': { $ref: '#/components/responses/ServerError' }
 
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Rotate the refresh token and get a new access token
+      description: >
+        Authenticated by the HttpOnly refresh cookie set at login (no request
+        body, no Authorization header needed). The cookie is rotated on every
+        call; presenting an already-used refresh token is treated as theft and
+        ends the whole session. The request must carry an `Origin` header that
+        is listed in `emerald.auth.allowed-origins` (CSRF defence), otherwise 403.
+      operationId: refreshToken
+      security: []
+      responses:
+        '200':
+          description: New access token; a new refresh cookie is set.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LoginResponse' }
+        '401':
+          description: Missing, expired, revoked or replayed refresh token. The cookie is cleared.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '403':
+          description: Origin header missing or not allowed.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '429':
+          description: Too many failed attempts.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '500': { $ref: '#/components/responses/ServerError' }
+
   /auth/logout:
     post:
       tags: [Auth]
       summary: Sign out
       description: >
-        Invalidates the current token server-side (e.g. deny-list until it
-        expires). The front end drops the token locally regardless of the result.
+        Ends the session identified by the refresh cookie: the refresh token
+        family is revoked, so the session's access tokens stop working at once.
+        Needs no Bearer token (it must work after the access token expired) and
+        is idempotent. Same `Origin` requirement as `/auth/refresh`.
       operationId: logout
-      security: [{ bearerAuth: [] }]
+      security: []
       responses:
-        '204': { description: Signed out. }
-        '401': { $ref: '#/components/responses/Unauthorized' }
+        '204': { description: Signed out; the refresh cookie is cleared. }
+        '403':
+          description: Origin header missing or not allowed.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
         '500': { $ref: '#/components/responses/ServerError' }
 
   /auth/me:

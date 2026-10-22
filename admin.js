@@ -77,14 +77,37 @@
     state.token = null; store(TOKEN_KEY, null);
     showLogin("Your session has expired. Please sign in again.");
   }
-  // Runs a live request with the bearer token, or the demo function when in demo mode.
+  // One refresh at a time. The server rotates the refresh cookie on every call and treats reuse of an
+  // old cookie as theft, so two parallel refreshes would end the session. Everyone shares one promise.
+  var refreshing = null;
+  function refreshSession() {
+    if (!refreshing) {
+      refreshing = E.request("POST", "/auth/refresh").then(function (auth) {
+        state.token = auth.accessToken;
+        state.user = auth.user;
+        store(TOKEN_KEY, state.token);
+        refreshing = null;
+        return auth;
+      }, function (err) {
+        refreshing = null;
+        throw err;
+      });
+    }
+    return refreshing;
+  }
+  // Runs a live request with the bearer token (or the demo function in demo mode).
+  // On 401 it silently refreshes the access token once and retries; only if that fails is the user signed out.
   function call(method, path, body, demoFn) {
     if (state.demo) {
       try { return Promise.resolve(demoFn()); } catch (e) { return Promise.reject(e); }
     }
-    return E.request(method, path, { body: body, token: state.token }).catch(function (err) {
-      if (err.status === 401) expired();
-      throw err;
+    function send() { return E.request(method, path, { body: body, token: state.token }); }
+    return send().catch(function (err) {
+      if (err.status !== 401) throw err;
+      return refreshSession().then(function () { return send(); }).catch(function (e) {
+        if (e.status === 401 || e.status === 403) expired();
+        throw e;
+      });
     });
   }
   function demoError(status, message) { var e = new E.ApiError(status, { message: message }, false); return e; }
