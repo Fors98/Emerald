@@ -1,0 +1,10 @@
+{
+  "passed": 5,
+  "checks": [
+    "HTTPS using trusted local CA",
+    "Secure cookie",
+    "HttpOnly cookie",
+    "SameSite Strict cookie",
+    "CSP and HSTS headers"
+  ]
+}

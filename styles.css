@@ -3,7 +3,7 @@
    Design tokens, base, layout, components
    ========================================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import url('assets/fonts/fonts.css');
 
 :root{
   /* --- color: base --- */
@@ -130,7 +130,7 @@ section{ position: relative; }
 .loader[hidden]{ opacity:0; visibility:hidden; }
 .loader-gem{
   width: 46px; height: 73px;
-  background-image: url("assets/crystal-orbit.png");
+  background-image: url("assets/crystal.svg");
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
@@ -405,7 +405,7 @@ section{ position: relative; }
 }
 .crystal-gem{
   width: 54px; height: 85px;
-  background-image: url("assets/crystal-orbit.png");
+  background-image: url("assets/crystal.svg");
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
@@ -544,7 +544,7 @@ section{ position: relative; }
 }
 .service-visual .crystal-gem{
   width: 110px; height: 159px;
-  background-image: url("assets/crystal-service.png");
+  background-image: url("assets/crystal.svg");
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
@@ -794,3 +794,5 @@ section{ position: relative; }
   .work-grid{ grid-template-columns: 1fr; }
   .cursor-dot{ display:none; }
 }
+
+textarea{resize:none;min-height:180px}:root{scrollbar-color:#426e58 #080e0c;scrollbar-width:auto}*:focus-visible{outline:2px solid #86e4b9;outline-offset:4px}@media(forced-colors:active){:root{scrollbar-color:auto}}

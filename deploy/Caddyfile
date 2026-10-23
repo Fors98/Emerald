@@ -1,0 +1,32 @@
+{$DOMAIN} {
+ encode zstd gzip
+ header {
+  X-Content-Type-Options nosniff
+  X-Frame-Options DENY
+  Referrer-Policy strict-origin-when-cross-origin
+  Permissions-Policy "camera=(), microphone=(), geolocation=()"
+  Strict-Transport-Security "max-age=31536000"
+  Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+ }
+ request_body {
+  max_size 6MB
+ }
+ handle /api/* {
+  reverse_proxy api:8080 {
+   header_up X-Real-IP {remote_host}
+   header_up -Forwarded
+   header_up -X-Forwarded-For
+  }
+ }
+ handle {
+  root * /srv
+  @html path / /index.html /admin.html /content-defaults.json
+  header @html Cache-Control "no-cache"
+  file_server
+ }
+ handle_errors {
+  rewrite * /404.html
+  root * /srv
+  file_server
+ }
+}

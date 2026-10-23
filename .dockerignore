@@ -1,0 +1,7 @@
+.git
+.env
+**/target
+media
+backups
+evidence
+node_modules

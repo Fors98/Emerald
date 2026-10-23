@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: emerald
+      POSTGRES_USER: emerald
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+    volumes: ['database:/var/lib/postgresql/data']
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U emerald -d emerald']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+  api:
+    build: .
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:postgresql://db:5432/emerald
+      DB_USERNAME: emerald
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      EMERALD_ADMIN_USERNAME: ${EMERALD_ADMIN_USERNAME:-admin}
+      EMERALD_ADMIN_PASSWORD_HASH: ${EMERALD_ADMIN_PASSWORD_HASH:?Set the bcrypt hash in .env}
+      EMERALD_MEDIA_DIR: /app/media
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes: ['media:/app/media']
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: ['no-new-privileges:true']
+    cap_drop: [ALL]
+  edge:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.edge
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN:?Set the public domain in .env}
+    ports: ['80:80', '443:443']
+    volumes: ['certificates:/data', 'caddy_config:/config']
+    depends_on: [api]
+volumes:
+  database:
+  media:
+  certificates:
+  caddy_config:

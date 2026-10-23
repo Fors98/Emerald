@@ -1,0 +1,1 @@
+{"profile":"product-admin","sourceRoots":["admin.html","admin.js","index.html","script.js"],"canonicalMap":"UX-CONTRACT.md","locale":"en","ownership":{"Select/Listbox":"native"},"requiredCapabilities":["Select/Listbox","Form","Scrollbar","Toast","CRUD"],"evidence":{"crudFullFlow":"tests/live_api.py","failurePaths":"tests/browser.cjs"}}

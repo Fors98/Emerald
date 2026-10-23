@@ -40,7 +40,7 @@
     </nav>
     <div class="nav-actions">
       <a href="#contact" class="nav-cta"><span class="dot" aria-hidden="true"></span>Let's talk</a>
-      <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="mobileMenu" aria-label="Open menu">
+      <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="mobileMenu" aria-label="Open menu" disabled data-js>
         <span></span><span></span><span></span>
       </button>
     </div>
@@ -79,9 +79,9 @@
   <section class="hero" id="home">
     <div class="hero-fog" aria-hidden="true"></div>
     <div class="hero-inner">
-      <span class="availability-badge"><span class="pulse-dot" aria-hidden="true"></span>Currently taking on new projects for Q1</span>
+      <span class="availability-badge"><span class="pulse-dot" aria-hidden="true"></span>Let’s discuss your next project</span>
       <span class="hero-eyebrow">Web · Product · Security · Growth · Infrastructure</span>
-      <h1>We don't build interfaces.<br>We <em>excavate</em> them.</h1>
+      <h1><span data-cms="hero.line1">We don't build interfaces.</span><br><span data-cms="hero.line2.prefix">We </span><em data-cms="hero.line2.emphasis">excavate</em><span data-cms="hero.line2.suffix"> them.</span></h1>
       <p class="hero-sub">Emerald is a five-discipline studio that treats every product like a dig site — we clear away what's unnecessary until the right idea is sitting in the open, clean and load-bearing.</p>
       <div class="hero-ctas">
         <a href="#contact" class="btn btn-primary">Start a project</a>
@@ -97,27 +97,27 @@
           <img id="statueImg" src="assets/extracted/embedded-3.png" alt="A weathered classical statue, cracked open at the face, standing as the emblem of Emerald studio" loading="eager">
         </div>
 
-        <button class="crystal" data-service="web-dev" data-target="#web-dev" aria-label="Web Development — jump to section">
+        <button class="crystal" data-service="web-dev" data-target="#web-dev" aria-label="Web Development — jump to section" disabled data-js>
           <span class="crystal-gem"></span>
           <span class="crystal-label">WEB DEV</span>
           <span class="crystal-tip">Interfaces that hold weight.</span>
         </button>
-        <button class="crystal" data-service="ui-ux" data-target="#ui-ux" aria-label="UI/UX — jump to section">
+        <button class="crystal" data-service="ui-ux" data-target="#ui-ux" aria-label="UI/UX — jump to section" disabled data-js>
           <span class="crystal-gem"></span>
           <span class="crystal-label">UI / UX</span>
           <span class="crystal-tip">Designed to be believed.</span>
         </button>
-        <button class="crystal" data-service="cyber" data-target="#cyber" aria-label="Cyber — jump to section">
+        <button class="crystal" data-service="cyber" data-target="#cyber" aria-label="Cyber — jump to section" disabled data-js>
           <span class="crystal-gem"></span>
           <span class="crystal-label">CYBER</span>
           <span class="crystal-tip">We guard what you've built.</span>
         </button>
-        <button class="crystal" data-service="marketing" data-target="#marketing" aria-label="Marketing — jump to section">
+        <button class="crystal" data-service="marketing" data-target="#marketing" aria-label="Marketing — jump to section" disabled data-js>
           <span class="crystal-gem"></span>
           <span class="crystal-label">MARKETING</span>
           <span class="crystal-tip">Attention, engineered.</span>
         </button>
-        <button class="crystal" data-service="devops" data-target="#devops" aria-label="DevOps — jump to section">
+        <button class="crystal" data-service="devops" data-target="#devops" aria-label="DevOps — jump to section" disabled data-js>
           <span class="crystal-gem"></span>
           <span class="crystal-label">DEVOPS</span>
           <span class="crystal-tip">Ships itself, mostly.</span>
@@ -140,7 +140,7 @@
       </div>
       <div class="about-copy reveal">
         <span class="section-kicker">About Emerald</span>
-        <h2>Every brief already contains its own answer. Most of it is just buried.</h2>
+        <h2 data-cms="about.heading">Every brief already contains its own answer. Most of it is just buried.</h2>
         <p>We started Emerald on a simple annoyance: too many studios treat design, code, security, growth and infrastructure as five separate vendors who happen to share an invoice template. We build them as one skill, applied by one small team, from the first sketch to the thing that's actually live.</p>
         <p>That means no relay race between departments, no brief that gets reinterpreted three times before it reaches the person writing code, and no security or infrastructure thinking bolted on after launch as an apology. It's slower to hire this way. It's faster to ship.</p>
         <ul class="about-list">
@@ -163,7 +163,7 @@
     <div class="container" style="padding-top: clamp(4.5rem, 9vw, 8rem);">
       <div class="section-head reveal">
         <span class="section-kicker">What we do</span>
-        <h2>Five disciplines. One buried premise.</h2>
+        <h2 data-cms="services.heading">Five disciplines. One buried premise.</h2>
         <p>Each service below runs independently when you need it to, and locks together seamlessly when you don't. Click a crystal above, or a heading below — both lead to the same place.</p>
       </div>
     </div>
@@ -172,8 +172,8 @@
       <article class="service-block" id="web-dev">
         <div>
           <span class="service-index">01</span>
-          <h3>Web Development</h3>
-          <p>Websites and web applications built on foundations that don't shift under load. We write front-end and back-end code meant to be read by the next engineer, not just shipped by this one.</p>
+          <h3 data-cms="services.web-dev.title">Web Development</h3>
+          <p data-cms="services.web-dev.description">Websites and web applications built on foundations that don't shift under load. We write front-end and back-end code meant to be read by the next engineer, not just shipped by this one.</p>
           <ul class="service-tags">
             <li>Marketing sites</li><li>Web applications</li><li>Front-end engineering</li>
             <li>Back-end systems</li><li>Performance</li><li>Accessibility</li><li>Scalable architecture</li>
@@ -188,8 +188,8 @@
       <article class="service-block" id="ui-ux">
         <div>
           <span class="service-index">02</span>
-          <h3>UI / UX Design</h3>
-          <p>Product design grounded in how people actually behave, not how a moodboard wants them to. Research, design systems and prototypes that hold up once real content and real users arrive.</p>
+          <h3 data-cms="services.ui-ux.title">UI / UX Design</h3>
+          <p data-cms="services.ui-ux.description">Product design grounded in how people actually behave, not how a moodboard wants them to. Research, design systems and prototypes that hold up once real content and real users arrive.</p>
           <ul class="service-tags">
             <li>Product design</li><li>User research</li><li>Design systems</li>
             <li>Prototyping</li><li>Interaction design</li><li>Conversion-focused UI</li>
@@ -204,8 +204,8 @@
       <article class="service-block" id="cyber">
         <div>
           <span class="service-index">03</span>
-          <h3>Cyber</h3>
-          <p>Security woven into the build, not inspected in afterwards. We audit applications and infrastructure, close the gaps we find, and set up monitoring so the next gap gets caught early. No system is unbreakable — ours are built to fail safely and get noticed fast.</p>
+          <h3 data-cms="services.cyber.title">Cyber</h3>
+          <p data-cms="services.cyber.description">Security woven into the build, not inspected in afterwards. We audit applications and infrastructure, close the gaps we find, and set up monitoring so the next gap gets caught early. No system is unbreakable — ours are built to fail safely and get noticed fast.</p>
           <ul class="service-tags">
             <li>Security audits</li><li>Application security</li><li>Infrastructure security</li>
             <li>Monitoring</li><li>Risk reduction</li><li>Security-first development</li>
@@ -220,8 +220,8 @@
       <article class="service-block" id="marketing">
         <div>
           <span class="service-index">04</span>
-          <h3>Marketing</h3>
-          <p>Brand strategy and growth work that assumes people are busy and skeptical, because they are. We build campaigns, content and SEO foundations that earn attention instead of renting it, then prove it with numbers you can check.</p>
+          <h3 data-cms="services.marketing.title">Marketing</h3>
+          <p data-cms="services.marketing.description">Brand strategy and growth work that assumes people are busy and skeptical, because they are. We build campaigns, content and SEO foundations that earn attention instead of renting it, then prove it with numbers you can check.</p>
           <ul class="service-tags">
             <li>Brand strategy</li><li>Digital campaigns</li><li>SEO</li>
             <li>Content</li><li>Growth</li><li>Analytics</li><li>Conversion optimization</li>
@@ -236,8 +236,8 @@
       <article class="service-block" id="devops">
         <div>
           <span class="service-index">05</span>
-          <h3>DevOps</h3>
-          <p>Cloud infrastructure and delivery pipelines that let you ship on a Friday without dread. Infrastructure as code, automated deployment and monitoring built so scaling up is a config change, not a re-architecture.</p>
+          <h3 data-cms="services.devops.title">DevOps</h3>
+          <p data-cms="services.devops.description">Cloud infrastructure and delivery pipelines that let you ship on a Friday without dread. Infrastructure as code, automated deployment and monitoring built so scaling up is a config change, not a re-architecture.</p>
           <ul class="service-tags">
             <li>Cloud infrastructure</li><li>CI/CD</li><li>Deployment automation</li>
             <li>Monitoring</li><li>Reliability</li><li>Infrastructure as code</li>
@@ -308,93 +308,53 @@
   <section class="work section-pad" id="work">
     <div class="container">
       <div class="section-head reveal">
-        <span class="section-kicker">Selected work</span>
-        <h2>A few things we've helped dig up.</h2>
-        <p>A representative sample of the kind of work we take on — concept case studies illustrating our range across disciplines.</p>
+        <span class="section-kicker">Concept explorations</span>
+        <h2 data-cms="work.heading">Ideas, made tangible.</h2>
+        <p>Illustrative concepts showing our design direction. These are not commissioned client projects or verified case studies.</p>
       </div>
       <div class="work-grid">
-        <article class="work-card p1" tabindex="0">
-          <div class="wc-bg" aria-hidden="true"></div>
-          <span class="wc-cat">Fintech</span>
-          <h3>Aurum</h3>
-          <p>A neobank platform rebuilt for speed and trust — a full front-end rewrite plus a fraud-monitoring layer clients never see until it matters.</p>
+        <article class="work-card p1">
+          <div class="wc-bg" data-cms-image="media.portfolio.1" aria-hidden="true"></div>
+          <span class="wc-cat" data-cms="portfolio.1.category">Fintech</span>
+          <h3 data-cms="portfolio.1.title">Aurum</h3>
+          <p data-cms="portfolio.1.description">Concept: A neobank platform rebuilt for speed and trust — a full front-end rewrite plus a fraud-monitoring layer clients never see until it matters.</p>
           <ul class="wc-tags"><li>Web Dev</li><li>Cyber</li></ul>
         </article>
-        <article class="work-card p2" tabindex="0">
-          <div class="wc-bg" aria-hidden="true"></div>
-          <span class="wc-cat">Fashion</span>
-          <h3>Solène</h3>
-          <p>A luxury fashion house's e-commerce experience, designed to feel as considered on a phone as it does in their flagship store.</p>
+        <article class="work-card p2">
+          <div class="wc-bg" data-cms-image="media.portfolio.2" aria-hidden="true"></div>
+          <span class="wc-cat" data-cms="portfolio.2.category">Fashion</span>
+          <h3 data-cms="portfolio.2.title">Solène</h3>
+          <p data-cms="portfolio.2.description">Concept: A luxury fashion house's e-commerce experience, designed to feel as considered on a phone as it does in their flagship store.</p>
           <ul class="wc-tags"><li>UI/UX</li><li>Marketing</li></ul>
         </article>
-        <article class="work-card p3" tabindex="0">
-          <div class="wc-bg" aria-hidden="true"></div>
-          <span class="wc-cat">Security</span>
-          <h3>Cordon</h3>
-          <p>A real-time infrastructure monitoring platform for a security vendor, built to surface the one alert that matters out of ten thousand.</p>
+        <article class="work-card p3">
+          <div class="wc-bg" data-cms-image="media.portfolio.3" aria-hidden="true"></div>
+          <span class="wc-cat" data-cms="portfolio.3.category">Security</span>
+          <h3 data-cms="portfolio.3.title">Cordon</h3>
+          <p data-cms="portfolio.3.description">Concept: A real-time infrastructure monitoring platform for a security vendor, built to surface the one alert that matters out of ten thousand.</p>
           <ul class="wc-tags"><li>Cyber</li><li>DevOps</li></ul>
         </article>
-        <article class="work-card p4" tabindex="0">
-          <div class="wc-bg" aria-hidden="true"></div>
-          <span class="wc-cat">Architecture</span>
-          <h3>Atrium Works</h3>
-          <p>A portfolio site for an architecture studio, where every project page loads like a slow, deliberate walk through the building.</p>
+        <article class="work-card p4">
+          <div class="wc-bg" data-cms-image="media.portfolio.4" aria-hidden="true"></div>
+          <span class="wc-cat" data-cms="portfolio.4.category">Architecture</span>
+          <h3 data-cms="portfolio.4.title">Atrium Works</h3>
+          <p data-cms="portfolio.4.description">Concept: A portfolio site for an architecture studio, where every project page loads like a slow, deliberate walk through the building.</p>
           <ul class="wc-tags"><li>Web Dev</li><li>Marketing</li></ul>
         </article>
-        <article class="work-card p5" tabindex="0">
-          <div class="wc-bg" aria-hidden="true"></div>
-          <span class="wc-cat">AI Product</span>
-          <h3>Muse</h3>
-          <p>A creative writing tool's public launch, from onboarding flow to the infrastructure that kept it upright on launch day.</p>
+        <article class="work-card p5">
+          <div class="wc-bg" data-cms-image="media.portfolio.5" aria-hidden="true"></div>
+          <span class="wc-cat" data-cms="portfolio.5.category">AI Product</span>
+          <h3 data-cms="portfolio.5.title">Muse</h3>
+          <p data-cms="portfolio.5.description">Concept: A creative writing tool's public launch, from onboarding flow to the infrastructure that kept it upright on launch day.</p>
           <ul class="wc-tags"><li>Web Dev</li><li>DevOps</li></ul>
         </article>
-        <article class="work-card p6" tabindex="0">
-          <div class="wc-bg" aria-hidden="true"></div>
-          <span class="wc-cat">E-commerce</span>
-          <h3>Ledger &amp; Co.</h3>
-          <p>An antique dealer's storefront, rebuilt so provenance photography and detail actually get the space they deserve online.</p>
+        <article class="work-card p6">
+          <div class="wc-bg" data-cms-image="media.portfolio.6" aria-hidden="true"></div>
+          <span class="wc-cat" data-cms="portfolio.6.category">E-commerce</span>
+          <h3 data-cms="portfolio.6.title">Ledger &amp; Co.</h3>
+          <p data-cms="portfolio.6.description">Concept: An antique dealer's storefront, rebuilt so provenance photography and detail actually get the space they deserve online.</p>
           <ul class="wc-tags"><li>Web Dev</li><li>UI/UX</li></ul>
         </article>
-      </div>
-    </div>
-  </section>
-
-  <!-- TESTIMONIALS -->
-  <section class="testimonials section-pad" id="testimonials">
-    <div class="container">
-      <div class="section-head reveal">
-        <span class="section-kicker">What clients say</span>
-        <h2>We'd rather they said it than us.</h2>
-      </div>
-      <div class="t-grid">
-        <div class="t-card">
-          <p class="t-quote">Emerald was the first studio we hired that pushed back on our own brief — and they were right to. The product that shipped was better than the one we asked for.</p>
-          <div class="t-person">
-            <div class="t-avatar">RK</div>
-            <div><b>Rina Kessler</b><span>Head of Product, Northfield Bank</span></div>
-          </div>
-        </div>
-        <div class="t-card">
-          <p class="t-quote">Most vendors hand off a security report and disappear. Emerald's team stayed until every finding was actually closed, then told us what to watch for next.</p>
-          <div class="t-person">
-            <div class="t-avatar">DA</div>
-            <div><b>Daniel Ács</b><span>CTO, Cordon Security</span></div>
-          </div>
-        </div>
-        <div class="t-card">
-          <p class="t-quote">I've worked with agencies that outsource the "boring" parts. Emerald treated our infrastructure with the same care they gave the homepage. It showed on launch day.</p>
-          <div class="t-person">
-            <div class="t-avatar">MT</div>
-            <div><b>Marion Tan</b><span>Founder, Muse</span></div>
-          </div>
-        </div>
-        <div class="t-card">
-          <p class="t-quote">They asked harder questions about our customers than our own research team had. The redesign converted almost twice what the old site did.</p>
-          <div class="t-person">
-            <div class="t-avatar">JB</div>
-            <div><b>Jonas Berg</b><span>Marketing Director, Solène</span></div>
-          </div>
-        </div>
       </div>
     </div>
   </section>
@@ -404,32 +364,32 @@
     <div class="container">
       <div class="section-head center reveal">
         <span class="section-kicker">Questions</span>
-        <h2>Before you ask.</h2>
+        <h2 data-cms="faq.heading">Before you ask.</h2>
       </div>
       <div class="faq-list">
         <div class="faq-item">
-          <h3><button class="faq-q" aria-expanded="false" aria-controls="faq-a-1" id="faq-q-1">What does Emerald actually do?<span class="plus" aria-hidden="true"></span></button></h3>
-          <div class="faq-a" id="faq-a-1" aria-hidden="true" role="region" aria-labelledby="faq-q-1"><p>We design and build digital products end to end — web development, product design, security, marketing and infrastructure — as one team rather than five separate hires.</p></div>
+          <h3><button class="faq-q" aria-expanded="false" aria-controls="faq-a-1" id="faq-q-1" disabled data-js><span data-cms="faq.1.question">What does Emerald actually do?</span><span class="plus" aria-hidden="true"></span></button></h3>
+          <div class="faq-a" id="faq-a-1" aria-hidden="true" role="region" aria-labelledby="faq-q-1"><p data-cms="faq.1.answer">We design and build digital products end to end — web development, product design, security, marketing and infrastructure — as one team rather than five separate hires.</p></div>
         </div>
         <div class="faq-item">
-          <h3><button class="faq-q" aria-expanded="false" aria-controls="faq-a-2" id="faq-q-2">Can you work alongside our existing team?<span class="plus" aria-hidden="true"></span></button></h3>
-          <div class="faq-a" id="faq-a-2" aria-hidden="true" role="region" aria-labelledby="faq-q-2"><p>Regularly. We slot into an existing team for a specific discipline — security audits and design systems are common entry points — and hand off cleanly with documentation your team can actually use.</p></div>
+          <h3><button class="faq-q" aria-expanded="false" aria-controls="faq-a-2" id="faq-q-2" disabled data-js><span data-cms="faq.2.question">Can you work alongside our existing team?</span><span class="plus" aria-hidden="true"></span></button></h3>
+          <div class="faq-a" id="faq-a-2" aria-hidden="true" role="region" aria-labelledby="faq-q-2"><p data-cms="faq.2.answer">Regularly. We slot into an existing team for a specific discipline — security audits and design systems are common entry points — and hand off cleanly with documentation your team can actually use.</p></div>
         </div>
         <div class="faq-item">
-          <h3><button class="faq-q" aria-expanded="false" aria-controls="faq-a-3" id="faq-q-3">Do you build from scratch, or work with what we have?<span class="plus" aria-hidden="true"></span></button></h3>
-          <div class="faq-a" id="faq-a-3" aria-hidden="true" role="region" aria-labelledby="faq-q-3"><p>Both. Most projects start with an audit of what exists so we're not rebuilding things that already work. What we replace, we replace on purpose.</p></div>
+          <h3><button class="faq-q" aria-expanded="false" aria-controls="faq-a-3" id="faq-q-3" disabled data-js><span data-cms="faq.3.question">Do you build from scratch, or work with what we have?</span><span class="plus" aria-hidden="true"></span></button></h3>
+          <div class="faq-a" id="faq-a-3" aria-hidden="true" role="region" aria-labelledby="faq-q-3"><p data-cms="faq.3.answer">Both. Most projects start with an audit of what exists so we're not rebuilding things that already work. What we replace, we replace on purpose.</p></div>
         </div>
         <div class="faq-item">
-          <h3><button class="faq-q" aria-expanded="false" aria-controls="faq-a-4" id="faq-q-4">Do you offer support after launch?<span class="plus" aria-hidden="true"></span></button></h3>
-          <div class="faq-a" id="faq-a-4" aria-hidden="true" role="region" aria-labelledby="faq-q-4"><p>Yes. Every project includes a post-launch window by default, and most clients keep us on a retainer for ongoing monitoring, iteration and support afterward.</p></div>
+          <h3><button class="faq-q" aria-expanded="false" aria-controls="faq-a-4" id="faq-q-4" disabled data-js><span data-cms="faq.4.question">Do you offer support after launch?</span><span class="plus" aria-hidden="true"></span></button></h3>
+          <div class="faq-a" id="faq-a-4" aria-hidden="true" role="region" aria-labelledby="faq-q-4"><p data-cms="faq.4.answer">Post-launch support, monitoring and improvements can be included in your proposal, with the scope and duration agreed before work begins.</p></div>
         </div>
         <div class="faq-item">
-          <h3><button class="faq-q" aria-expanded="false" aria-controls="faq-a-5" id="faq-q-5">What technologies do you use?<span class="plus" aria-hidden="true"></span></button></h3>
-          <div class="faq-a" id="faq-a-5" aria-hidden="true" role="region" aria-labelledby="faq-q-5"><p>We pick the stack to fit the problem rather than our own preferences — commonly modern JavaScript frameworks, cloud-native infrastructure and established, well-audited security tooling. We'll always explain the choice.</p></div>
+          <h3><button class="faq-q" aria-expanded="false" aria-controls="faq-a-5" id="faq-q-5" disabled data-js><span data-cms="faq.5.question">What technologies do you use?</span><span class="plus" aria-hidden="true"></span></button></h3>
+          <div class="faq-a" id="faq-a-5" aria-hidden="true" role="region" aria-labelledby="faq-q-5"><p data-cms="faq.5.answer">We pick the stack to fit the problem rather than our own preferences — commonly modern JavaScript frameworks, cloud-native infrastructure and established, well-audited security tooling. We'll always explain the choice.</p></div>
         </div>
         <div class="faq-item">
-          <h3><button class="faq-q" aria-expanded="false" aria-controls="faq-a-6" id="faq-q-6">How does a project actually start?<span class="plus" aria-hidden="true"></span></button></h3>
-          <div class="faq-a" id="faq-a-6" aria-hidden="true" role="region" aria-labelledby="faq-q-6"><p>A short call to understand the problem, followed by a scoped proposal within a few business days. No lengthy sales process before you know roughly what it costs.</p></div>
+          <h3><button class="faq-q" aria-expanded="false" aria-controls="faq-a-6" id="faq-q-6" disabled data-js><span data-cms="faq.6.question">How does a project actually start?</span><span class="plus" aria-hidden="true"></span></button></h3>
+          <div class="faq-a" id="faq-a-6" aria-hidden="true" role="region" aria-labelledby="faq-q-6"><p data-cms="faq.6.answer">A short call to understand the problem, followed by a scoped proposal within a few business days. No lengthy sales process before you know roughly what it costs.</p></div>
         </div>
       </div>
     </div>
@@ -445,12 +405,12 @@
     <div class="container contact-grid">
       <div class="contact-head reveal">
         <span class="section-kicker">Get in touch</span>
-        <h2>Have an idea worth digging into?</h2>
-        <p>Tell us what you're building. We'll reply within two business days with real thoughts, not a form-letter.</p>
+        <h2 data-cms="contact.heading">Have an idea worth digging into?</h2>
+        <p>Tell us what you're building, what needs to improve, and what a successful outcome would look like.</p>
         <ul class="contact-info">
-          <li><b>Email</b><a href="mailto:hello@emerald-studio.example">hello@emerald-studio.example</a></li>
-          <li><b>Studio</b>Remote-first, with team members across Europe and the UK</li>
-          <li><b>Response time</b>Within two business days, always</li>
+          <li><b>Contact</b><a href="#contactForm">Send a project enquiry</a></li>
+          <li><b>Studio</b>Independent digital studio</li>
+          <li><b>Next step</b>A conversation about your project</li>
         </ul>
       </div>
 
@@ -489,7 +449,7 @@
         </div>
         <div class="field">
           <label for="f-message">Message</label>
-          <textarea id="f-message" name="message" required minlength="10"></textarea>
+          <textarea style="resize:none" id="f-message" name="message" required minlength="10"></textarea>
           <span class="field-error" id="err-message"></span>
         </div>
         <div class="form-submit">
@@ -513,10 +473,7 @@
       <li><a href="#contact">Contact</a></li>
       <li><a href="privacy.html">Privacy</a></li>
     </ul>
-    <div class="footer-social">
-      <a href="#" aria-label="Emerald on LinkedIn (placeholder)">LinkedIn</a>
-      <a href="#" aria-label="Emerald on Instagram (placeholder)">Instagram</a>
-    </div>
+
   </div>
   <div class="container" style="margin-top:1.6rem;">
     <span class="footer-copy">© <span id="year"></span> Emerald Digital Studio. All rights reserved.</span>
@@ -525,5 +482,6 @@
 </footer>
 
 <script src="script.js"></script>
+<script src="cms.js" defer></script>
 </body>
 </html>

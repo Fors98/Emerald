@@ -1,0 +1,5 @@
+FROM caddy:2-alpine
+COPY deploy/Caddyfile /etc/caddy/Caddyfile
+COPY index.html admin.html privacy.html 404.html styles.css script.js cms.js admin.css admin.js content-defaults.json /srv/
+COPY assets /srv/assets
+COPY crystal-reference-1.png crystal-reference-2.png /srv/

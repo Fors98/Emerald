@@ -1,0 +1,8 @@
+package com.emerald.backend.contact;
+import com.emerald.backend.audit.AuditService;import jakarta.validation.Valid;import jakarta.validation.constraints.*;import org.springframework.data.domain.*;import org.springframework.http.HttpStatus;import org.springframework.transaction.annotation.Transactional;import org.springframework.web.bind.annotation.*;import org.springframework.web.server.ResponseStatusException;import java.util.*;import java.security.Principal;
+@RestController @RequestMapping("/admin/contacts") public class AdminContactController{
+ private final ContactRepository repository;private final AuditService audit;public AdminContactController(ContactRepository repository,AuditService audit){this.repository=repository;this.audit=audit;}
+ @GetMapping public Page<Contact> list(@RequestParam(defaultValue="0")int page,@RequestParam(defaultValue="20")int size){if(page<0||page>100000||size<1||size>100)throw new ResponseStatusException(HttpStatus.BAD_REQUEST);return repository.findAll(PageRequest.of(page,size,Sort.by(Sort.Direction.DESC,"receivedAt").and(Sort.by("id"))));}
+ public record Update(@NotBlank @Pattern(regexp="NEW|IN_PROGRESS|CLOSED")String status,@NotNull @Size(max=5000)String notes,@NotNull Long version){}
+ @PatchMapping("/{id}") @Transactional public Contact update(@PathVariable UUID id,@Valid @RequestBody Update request,Principal p){Contact c=repository.findById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));if(!c.getVersion().equals(request.version()))throw new ResponseStatusException(HttpStatus.CONFLICT);c.update(request.status(),request.notes());repository.saveAndFlush(c);audit.record(p.getName(),"ENQUIRY_UPDATED",id.toString());return c;}
+}

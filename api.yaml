@@ -1,172 +1,266 @@
-openapi: 3.0.3
-info:
-  title: Emerald Studio API
-  description: >
-    API contract for the Emerald Digital Studio website.
-    This specification covers only what the current front end
-    (index.html + script.js, as uploaded) actually requires.
-    No endpoint below was invented for genericity or "completeness" —
-    each one is traced to a specific piece of front-end code.
-    See the accompanying compatibility report for what was deliberately
-    left out and why.
-  version: 0.1.0
-servers:
-  - url: /api
-    description: Same-origin relative path (Spring Boot serving the API and the static site together)
-
-tags:
-  - name: Contact
-    description: The site's single interactive feature — the contact form.
-
-paths:
-  /contact:
-    post:
-      tags: [Contact]
-      summary: Submit the contact form
-      description: >
-        Evidence: `index.html` line ~393 (`<form id="contactForm">`) and
-        `script.js` `contactForm()` IIFE (~line 374-433). The form is
-        the contact form submits JSON to this endpoint using `fetch()`.
-        The frontend reads the HTTP status and response body; successful
-        submissions display the site's confirmation message.
-      operationId: submitContactForm
-      security: [] # No auth in the front end for this form — it's a public site.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ContactRequest'
-            examples:
-              typical:
-                value:
-                  name: "Alex Rivera"
-                  email: "alex@example.com"
-                  company: "Northwind Ltd"
-                  projectType: "Web Development"
-                  message: "We need a rebuild of our marketing site."
-      responses:
-        '201':
-          description: >
-            Message accepted. The backend returns a JSON confirmation
-            envelope containing the submission id, receipt timestamp,
-            and status. The frontend currently uses the successful HTTP
-            response to complete the submission flow.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ContactResponse'
-        '400':
-          description: >
-            Validation failed. Field names in `errors` should match the
-            form's `name` attributes (name, email, company, projectType,
-            message) so the front end can map each error to its existing
-            `<span class="field-error" id="err-...">` element.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
-        '415':
-          description: Unsupported media type.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '500':
-          description: Unexpected server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-components:
-  schemas:
-    ContactRequest:
-      type: object
-      description: >
-        Fields match the `name` attributes of the contact form inputs
-        in index.html. The frontend explicitly builds this JSON payload
-        before submitting it; the backend validates every field server-side.
-      required: [name, email, message]
-      properties:
-        name:
-          type: string
-          minLength: 1
-          maxLength: 255
-          example: "Alex Rivera"
-          description: 'input#f-name — HTML "required", no other constraint client-side.'
-        email:
-          type: string
-          format: email
-          maxLength: 254
-          example: "alex@example.com"
-          description: >
-            input#f-email — client-side validated with regex
-            /^[^\s@]+@[^\s@]+\.[^\s@]+$/.
-            Server must re-validate; do not trust the client check.
-        company:
-          type: string
-          maxLength: 255
-          nullable: true
-          example: "Northwind Ltd"
-          description: 'input#f-company — optional in the HTML (no "required").'
-        projectType:
-          type: string
-          maxLength: 255
-          nullable: true
-          description: >
-            select#f-type — optional. ASSUMPTION: modeled as free text,
-            not a strict enum, because the option labels are marketing
-            copy ("Web Development", "UI / UX Design", "Cyber",
-            "Marketing", "DevOps", "Something else") that product may
-            change without a coordinated API version bump. If the team
-            prefers a hard enum, tighten this later.
-          example: "Web Development"
-        message:
-          type: string
-          minLength: 10
-          maxLength: 5000
-          example: "We need a rebuild of our marketing site."
-          description: >
-            textarea#f-message — HTML "required minlength=10",
-            matched by the server-side validation.
-
-    ContactResponse:
-      type: object
-      description: >
-        JSON confirmation returned by the backend after a successful
-        contact submission.
-      properties:
-        id:
-          type: string
-          format: uuid
-        receivedAt:
-          type: string
-          format: date-time
-        status:
-          type: string
-          enum: [received]
-
-    ValidationErrorResponse:
-      type: object
-      required: [errors]
-      properties:
-        errors:
-          type: object
-          description: >
-            Map of field name -> message, keyed by the same names used
-            in the `<span class="field-error" id="err-name|err-email|
-            err-message">` elements, allowing the frontend to map
-            returned field errors to the corresponding form fields.
-            message` directly.
-          additionalProperties:
-            type: string
-          example:
-            email: "Enter a valid email address."
-
-    ErrorResponse:
-      type: object
-      properties:
-        message:
-          type: string
-          example: "Something went wrong. Please try again."
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Emerald API",
+    "version": "1.0.0",
+    "description": "Same-origin session API. Obtain /auth/csrf before login and again after login; send its headerName/token for every authenticated mutation. Validation 400, anonymous 401, CSRF 403, missing 404, stale version 409, throttled 429. Versions: -1 creates a CMS override; existing writes/reset require returned version."
+  },
+  "servers": [
+    {
+      "url": "/api"
+    }
+  ],
+  "paths": {
+    "/actuator/health": {
+      "get": {
+        "summary": "Database health",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/content": {
+      "get": {
+        "summary": "Public text and image URL overrides as key/value map",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/contact": {
+      "post": {
+        "summary": "Create enquiry: name, email, message (10\u20135000 chars), optional company/projectType",
+        "responses": {
+          "201": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/auth/csrf": {
+      "get": {
+        "summary": "Get token and headerName",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Sign in using form-urlencoded username/password and CSRF header",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "summary": "Current administrator identity",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ]
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "summary": "Invalidate session; CSRF required",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ]
+      }
+    },
+    "/admin/contacts": {
+      "get": {
+        "summary": "Paginated enquiries: page=0, size=20 (maximum100)",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ]
+      }
+    },
+    "/admin/contacts/{id}": {
+      "patch": {
+        "summary": "Update status (NEW/IN_PROGRESS/CLOSED), notes (max5000) and version",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/admin/content": {
+      "get": {
+        "summary": "All overrides: key maps to value and version",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ]
+      }
+    },
+    "/admin/content/{key}": {
+      "put": {
+        "summary": "Save value (nonblank max20000) and version; allowed keys in content-keys.txt",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Reset override using required version query parameter",
+        "responses": {
+          "204": {
+            "description": "Success"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ]
+      }
+    },
+    "/admin/media": {
+      "post": {
+        "summary": "Upload multipart file: PNG/JPEG up to5MB and16MP; returns url",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ]
+      }
+    },
+    "/media/{filename}": {
+      "get": {
+        "summary": "Public sanitized image",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "parameters": [
+          {
+            "name": "filename",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/admin/audit": {
+      "get": {
+        "summary": "Change history: page=0, fixed 50 events per page",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "session": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "JSESSIONID"
+      }
+    }
+  }
+}

@@ -28,6 +28,13 @@ public class Contact {
     @Column(nullable = false)
     private OffsetDateTime receivedAt;
 
+    @Column(nullable=false,length=24) private String status="NEW";
+    @Column(nullable=false,columnDefinition="TEXT") private String notes="";
+    @Version private Long version;
+    public String getStatus(){return status;}
+    public String getNotes(){return notes;}
+    public Long getVersion(){return version;}
+    public void update(String status,String notes){this.status=status;this.notes=notes;}
     public Contact() {
     }
 

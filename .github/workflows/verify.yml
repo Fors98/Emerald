@@ -1,0 +1,20 @@
+name: Verify Emerald
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+      - run: mvn -B -f backend/pom.xml verify
+      - run: node --check admin.js && node --check script.js && node --check cms.js
+      - run: docker compose --env-file .env.example config --quiet
+      - run: docker build -t emerald-api:verify .
+      - run: docker build -f deploy/Dockerfile.edge -t emerald-edge:verify .

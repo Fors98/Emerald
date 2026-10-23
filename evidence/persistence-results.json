@@ -1,0 +1,8 @@
+{
+  "passed": 3,
+  "checks": [
+    "API restart preserves content",
+    "PostgreSQL backup restored into separate database",
+    "Restored enquiry notes match"
+  ]
+}

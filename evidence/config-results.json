@@ -1,0 +1,6 @@
+{
+  "caddy": "passed",
+  "compose": "passed",
+  "javascriptSyntax": "passed",
+  "containerBuild": "not run: no Docker daemon"
+}

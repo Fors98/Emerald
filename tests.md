@@ -1,62 +1,11 @@
-# Emerald API Tests
+# Verification
 
-## Environment
+Run Java 21 and Maven: `mvn -f backend/pom.xml clean verify`.
 
-- Base URL: `http://localhost:8080/api`
-- Endpoint: `POST /contact`
-- Database: PostgreSQL `emerald_db`
-- API contract: `api.yaml`
+For integration tests, start the application against a disposable PostgreSQL database with administrator username `admin` and a BCrypt hash of a temporary password. Serve the public files and proxy `/api` to the backend on the same origin. Set `EMERALD_TEST_PASSWORD` to that password and `EMERALD_TEST_BASE` to the API URL. Run `python3 tests/live_api.py`. This creates enquiries, content and media and exercises rate limits. Never run against production.
 
-## Test Results
+Then install Playwright in your test environment and its Chromium browser. Set `EMERALD_WEB_BASE` to the web origin and run `node tests/browser.cjs`. `CHROME_PATH` can select an existing Chromium executable. Run API tests first: browser tests expect their enquiry. Test scripts replace evidence results.
 
-### 1. Valid contact submission
+For local test TLS only, Python supports `EMERALD_TEST_CA` pointing to the local CA certificate; the browser accepts `EMERALD_LOCAL_TLS=1`. Do not use certificate bypass for a real public host. Production cookie checks require HTTPS and the prod profile.
 
-**Expected:** `201 Created`
-**Actual:** `201 Created`
-**Result:** PASS
-
-Response contained `id`, `receivedAt`, and `status: "received"`.
-
-The created contact was verified directly in PostgreSQL.
-
-### 2. Invalid field values
-
-**Request:** Empty name, invalid email, and message shorter than 10 characters.
-
-**Expected:** `400 Bad Request`
-**Actual:** `400 Bad Request`
-**Result:** PASS
-
-Validation errors were returned for `name`, `email`, and `message`.
-
-### 3. Missing required fields
-
-**Request:** `{}`
-
-**Expected:** `400 Bad Request`
-**Actual:** `400 Bad Request`
-**Result:** PASS
-
-Validation errors were returned for `name`, `email`, and `message`.
-
-## Contract Coverage
-
-| Case | Expected | Tested | Result |
-|---|---:|---:|---|
-| Valid contact | 201 | Yes | PASS |
-| Invalid name | 400 | Yes | PASS |
-| Invalid email | 400 | Yes | PASS |
-| Message shorter than 10 characters | 400 | Yes | PASS |
-| Missing required fields | 400 | Yes | PASS |
-| Rate limiting | 429 | No | Not tested |
-| Server error | 500 | No | Not tested |
-
-## Database Verification
-
-The successful contact submission was verified in PostgreSQL. The stored record contained the submitted name, email, company, project type, message, generated UUID, and received timestamp.
-
-## Conclusion
-
-The tested `POST /api/contact` validation and persistence flow is working against the current `api.yaml` contract.
-
-The `429` and `500` responses are documented by the API contract but were not artificially triggered during this test session.
+Saved results and verification limits are described in RELEASE.md. CI runs unit/security tests, JavaScript syntax checks, Compose configuration validation and both Docker builds. Browser and API acceptance require their disposable runtime and are separate from CI.

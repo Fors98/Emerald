@@ -1,0 +1,21 @@
+{
+  "passed": 16,
+  "checks": [
+    "Invalid password stays signed out",
+    "Login and persisted enquiry displayed",
+    "CMS save through browser",
+    "Public CMS text and removed fictional testimonials",
+    "Failed save preserves draft",
+    "Expired session reauthentication preserves draft",
+    "Reset dialog Escape cancels safely",
+    "Confirmed reset restores default",
+    "Image upload and assignment",
+    "Audit history displayed",
+    "Mobile admin without horizontal overflow",
+    "Section selector keyboard interaction",
+    "Contact validation and first-error focus",
+    "Mobile public contact form end to end",
+    "Sign-out clears private content",
+    "No browser JavaScript errors"
+  ]
+}

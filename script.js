@@ -383,6 +383,8 @@
       var field = document.getElementById(fieldId);
       var err = document.getElementById(errId);
       var wrap = field.closest(".field");
+      field.setAttribute("aria-invalid", message ? "true" : "false");
+      if (err) field.setAttribute("aria-describedby", errId);
 
       if (message) {
         wrap.classList.add("has-error");
@@ -411,6 +413,7 @@
 
     form.addEventListener("submit", function (e) {
       e.preventDefault();
+      if (submitBtn.disabled) return;
 
       status.classList.remove("is-visible", "is-error");
       clearErrors();
@@ -465,7 +468,7 @@
             : "Message must be 5000 characters or fewer."
       );
 
-      if (!(validName && validEmail && validCompany && validProjectType && validMessage)) return;
+      if (!(validName && validEmail && validCompany && validProjectType && validMessage)) { form.querySelector('[aria-invalid="true"]')?.focus(); return; }
 
       if (!payload.company) delete payload.company;
       if (!payload.projectType) delete payload.projectType;
@@ -476,6 +479,7 @@
 
       fetch((window.EMERALD_API_BASE || document.querySelector('meta[name="emerald-api-base"]')?.getAttribute("content") || "/api") + "/contact", {
         method: "POST",
+        signal: AbortSignal.timeout(20000),
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json"
@@ -504,7 +508,7 @@
         })
         .then(function () {
           showStatus(
-            "Thanks — your message is in. We'll reply within two business days.",
+            "Thanks — your message is in. We'll review your enquiry and get back to you.",
             false
           );
           form.reset();
@@ -545,7 +549,11 @@
               "Please fix the highlighted fields and try again.",
               true
             );
-          } else if (error.status === 415) {
+          } else if (error.status === 429) {
+ showStatus("Too many attempts. Wait one minute before trying again.", true);
+ } else if (error.name === "TimeoutError") {
+ showStatus("The server took too long. Your message may have arrived; check with us before sending again.", true);
+ } else if (error.status === 415) {
             showStatus(
               "We couldn't send the message in the expected format. Please try again.",
               true
@@ -557,7 +565,7 @@
             );
           } else {
             showStatus(
-              "We couldn't reach the server. Please try again shortly, or email us directly.",
+              "We couldn't reach the server. Please try again shortly, and keep a copy of your message.",
               true
             );
           }
@@ -602,3 +610,5 @@
   })();
 
 })();
+
+document.querySelectorAll('button[data-js]').forEach(b=>b.disabled=false);
