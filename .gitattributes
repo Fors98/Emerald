@@ -1,0 +1,14 @@
+* text=auto
+*.java text eol=lf
+*.properties text eol=lf
+*.sql text eol=lf
+*.sh text eol=lf
+*.js text eol=lf
+*.cjs text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.yml text eol=lf
+backend/src/main/resources/content-keys.txt text eol=lf
+*.png binary
+*.jpg binary
+*.ttf binary

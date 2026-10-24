@@ -1,0 +1,85 @@
+// Regression checks for Aziz/Lexa findings. Uses a local static server; CMS responses are fixtures.
+const { chromium } = require('playwright');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const http = require('node:http');
+const root = path.resolve(__dirname, '..');
+const checks = [];
+const server = http.createServer((req, res) => {
+  let pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
+  const file = path.resolve(root, '.' + (pathname === '/' ? '/index.html' : pathname));
+  if (!file.startsWith(root + path.sep)) { res.writeHead(403); res.end(); return; }
+  const types = {'.html':'text/html','.css':'text/css','.js':'application/javascript','.png':'image/png','.svg':'image/svg+xml','.ttf':'font/ttf'};
+  fs.readFile(file, (error, bytes) => {
+    res.writeHead(error ? 404 : 200, {'Content-Type': types[path.extname(file)] || 'application/octet-stream'});
+    res.end(error ? 'Not found' : bytes);
+  });
+});
+(async () => {
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const browser = await chromium.launch({executablePath:process.env.CHROME_PATH || undefined, args:['--no-sandbox']});
+  try {
+    const context = await browser.newContext({viewport:{width:390,height:844}, reducedMotion:'reduce'});
+    const p = await context.newPage(); const errors = [];
+    p.on('pageerror', e => errors.push(e.message));
+    await p.route('**/api/content', route => route.fulfill({json:{'faq.1.answer': 'A longer published answer. '.repeat(250)}}));
+    await p.goto(base); await p.locator('#menuBtn').waitFor({state:'visible'});
+    const menu = p.locator('#mobileMenu'), button = p.locator('#menuBtn');
+    assert.equal(await menu.isVisible(), false);
+    await menu.locator('a').first().evaluate(el => el.focus());
+    assert.equal(await menu.evaluate(el => el.contains(document.activeElement)), false);
+    checks.push('Closed menu cannot receive focus');
+    await button.focus(); await p.keyboard.press('Tab');
+    assert.equal(await menu.evaluate(el => el.contains(document.activeElement)), false);
+    checks.push('Tab skips closed menu');
+    await button.click(); assert.equal(await menu.isVisible(), true);
+    await p.keyboard.press('Escape');
+    assert.equal(await menu.isVisible(), false);
+    assert.equal(await button.evaluate(el => el === document.activeElement), true);
+    assert.notEqual(await p.evaluate(() => getComputedStyle(document.body).overflow), 'hidden');
+    checks.push('Escape closes menu, restores focus and unlocks scrolling');
+    await button.click(); await p.setViewportSize({width:1440,height:900});
+    assert.equal(await menu.isVisible(), false);
+    assert.notEqual(await p.evaluate(() => getComputedStyle(document.body).overflow), 'hidden');
+    await p.mouse.wheel(0, 600); await p.waitForFunction(() => scrollY > 0);
+    assert.equal(await p.locator('main').evaluate(el => el.inert), false);
+    checks.push('Mobile-to-desktop resize closes menu and restores actual scrolling');
+    await p.setViewportSize({width:390,height:844});
+    await button.click(); await menu.locator('a').last().focus(); await p.keyboard.press('Tab');
+    assert.equal(await button.evaluate(el => el === document.activeElement), true);
+    await p.keyboard.press('Escape');
+    checks.push('Open menu keeps keyboard focus within navigation');
+    await p.locator('.faq-q').first().click();
+    const answer = p.locator('.faq-a').first();
+    await p.waitForFunction(() => document.querySelector('.faq-a').clientHeight > 200);
+    assert.equal(await answer.evaluate(el => el.scrollHeight <= el.clientHeight + 1), true);
+    await p.setViewportSize({width:1440,height:900});
+    assert.equal(await answer.evaluate(el => el.scrollHeight <= el.clientHeight + 1), true);
+    checks.push('Long published FAQ answer remains fully visible at mobile and desktop widths');
+    const card = p.locator('.work-card').first();
+    await card.focus(); assert.equal(await card.evaluate(el => el === document.activeElement), true);
+    await p.waitForFunction(() => getComputedStyle(document.querySelector('.work-card p')).opacity === '1');
+    assert.equal(await card.locator('p').evaluate(el => el.scrollHeight <= el.clientHeight + 1), true);
+    checks.push('Keyboard focus reveals full portfolio description');
+    const nojs = await browser.newContext({javaScriptEnabled:false,viewport:{width:390,height:844}});
+    const plain = await nojs.newPage(); await plain.goto(base);
+    assert.equal(await plain.locator('#loader').isVisible(), false);
+    assert.equal(await plain.locator('main').isVisible(), true);
+    checks.push('Disabled JavaScript leaves the loader hidden and website accessible');
+    await nojs.close();
+    const denied = await browser.newContext({reducedMotion:'reduce'});
+    await denied.addInitScript(() => Object.defineProperty(window,'sessionStorage',{get(){throw new Error('Storage disabled');}}));
+    const deniedPage = await denied.newPage();
+    await deniedPage.route('**/api/content', route=>route.fulfill({json:{}}));
+    await deniedPage.goto(base);
+    await deniedPage.waitForFunction(()=>document.querySelector('#loader').hidden);
+    assert.equal(await deniedPage.locator('#menuBtn').isEnabled(), true);
+    checks.push('Blocked session storage does not break loader or menu initialization');
+    assert.deepEqual(errors, []); checks.push('No browser JavaScript errors');
+    await p.screenshot({path:process.env.REVIEW_SCREENSHOT || '/tmp/emerald-review-ui.png',fullPage:false});
+    fs.writeFileSync(path.join(root,'evidence/review-browser-results.json'),JSON.stringify({scope:'Static server + mocked CMS response; Chromium',passed:checks.length,checks},null,2));
+    console.log(JSON.stringify({passed:checks.length,checks},null,2));
+  } finally { await browser.close(); }
+})().catch(error => {console.error(error);process.exitCode=1;}).finally(()=>server.close());

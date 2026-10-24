@@ -1,6 +1,6 @@
 .env
 backend/target/
-media/
+/media/
 backups/
 node_modules/
 playwright-report/

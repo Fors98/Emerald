@@ -1,7 +1,7 @@
 .git
 .env
 **/target
-media
+/media
 backups
 evidence
 node_modules

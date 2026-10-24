@@ -1,20 +1,9 @@
-# Emerald 1.0.0 — verification, 23 October 2026
+# Emerald review corrections — 24 October 2026
 
-Implemented: public enquiry form, authenticated administrator sessions, editable website text, image uploads/assignment/reset, enquiry status/private notes, paginated enquiry and audit views, version conflict protection, database migrations, HTTPS reverse proxy, container configuration, backup/restore helpers and CI.
+The original 63870b1 release is not approved. Its upload evidence is withdrawn: media source was omitted by broad directory exclusions. Archived reports are not valid evidence for that commit.
 
-Verified on the recovered source:
-- Maven clean verify: 19 regression/security tests, zero failures or errors.
-- Real PostgreSQL 16 API acceptance: 29 passing checks.
-- Chromium browser acceptance: 16 passing checks, including mobile layout, keyboard interaction, failed-save draft preservation and expired-session recovery.
-- Persistence: 3 passing checks covering API restart, database backup restoration and retained private notes.
-- HTTPS: 5 passing cookie/header checks through Caddy with the production Spring profile.
-- Strict UI source audit: zero findings. Mobile admin screenshot visually inspected.
-- Caddy production configuration and Docker Compose configuration validate.
+Corrections: restore image upload/read routes, anchor runtime media exclusions at the project root, fix menu resize/Escape/focus behavior, remove FAQ height limits, make portfolio descriptions keyboard/touch accessible, normalize CMS allowlist line endings, and keep the loading overlay hidden until JavaScript runs.
 
-Machine-readable results are in evidence/. These are bounded acceptance checks, not a claim of exhaustive security or accessibility certification. The tests used disposable databases; no live records were touched.
+Added regression coverage for uploads/security/re-encoding, line endings and public browser interactions. Verification is performed on a clean Git export; see evidence/ for new results and their source identity. Historical reports are isolated in archive/unverified-evidence-63870b1/.
 
-## Deployment status
-
-Source and deployment configuration are prepared. The app is not live. This environment has no Docker daemon, so the container image builds and Compose runtime still need execution on the target host. CI includes those builds. Public DNS, certificate issuance, host sizing, monitoring, off-host backup scheduling and any existing-database migration remain host-specific release checks. Follow DEPLOY.md.
-
-The delivered scope is the Emerald website and administrative backend. Email notifications, multi-user roles, external CRM integrations and AI agent orchestration are not implemented. The public portfolio is labeled as concept work, and unsupported testimonials/contact claims were removed.
+Public hosting, Docker runtime, broad physical-device testing and independent security/accessibility assessments remain unverified. Do not deploy until Aziz reviews the corrected commit and the actual deployment checks in DEPLOY.md pass.

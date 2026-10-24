@@ -4,7 +4,8 @@ import org.springframework.core.io.ClassPathResource;import org.springframework.
 import java.util.*;import java.security.Principal;import java.io.*;import java.nio.charset.StandardCharsets;
 @RestController @RequestMapping("/admin/content") public class AdminContentController{
  private final SiteContentRepository repository;private final AuditService audit;private final Set<String>keys;
- public AdminContentController(SiteContentRepository repository,AuditService audit)throws IOException{this.repository=repository;this.audit=audit;try(var in=new ClassPathResource("content-keys.txt").getInputStream()){keys=new HashSet<>(Arrays.asList(new String(in.readAllBytes(),StandardCharsets.UTF_8).split("\n")));}}
+ public AdminContentController(SiteContentRepository repository,AuditService audit)throws IOException{this.repository=repository;this.audit=audit;try(var in=new ClassPathResource("content-keys.txt").getInputStream()){keys=parseKeys(new String(in.readAllBytes(),StandardCharsets.UTF_8));}}
+ static Set<String> parseKeys(String text) { return new HashSet<>(text.lines().map(String::strip).filter(line -> !line.isEmpty()).toList()); }
  public record ContentUpdate(@NotBlank @Size(max=20000)String value,@NotNull Long version){}
  @GetMapping public Map<String,Object> list(){Map<String,Object>out=new TreeMap<>();repository.findAll().forEach(i->out.put(i.getKey(),Map.of("value",i.getValue(),"version",i.getVersion())));return out;}
  @PutMapping("/{key}") @Transactional public Map<String,Object> update(@PathVariable String key,@Valid @RequestBody ContentUpdate request,Principal p){
