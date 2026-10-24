@@ -1,0 +1,11 @@
+{
+  "scope": "Clean Git export; executable JAR; PostgreSQL 16.9; Caddy local HTTPS; production Spring profile",
+  "passed": 5,
+  "checks": [
+    "Browser-submitted enquiry and admin notes/status persist after restart",
+    "Published CMS values and image assignment persist after restart",
+    "Uploaded image bytes remain retrievable and unchanged after restart",
+    "Production session cookie has Secure, HttpOnly and SameSite Strict",
+    "HTTPS public media carries CSP and HSTS headers"
+  ]
+}

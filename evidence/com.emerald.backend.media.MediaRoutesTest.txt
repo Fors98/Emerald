@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.emerald.backend.media.MediaRoutesTest
+-------------------------------------------------------------------------------
+Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.538 s -- in com.emerald.backend.media.MediaRoutesTest

@@ -1,6 +1,6 @@
 # Emerald: pre-deployment review for Aziz
 
-Review branch: release/emerald-website-review. Base: wael/api-contract at e7fc31b.
+Correction branch: fix/aziz-review-findings, based on release commit 63870b1. The correction can be fast-forwarded into release/emerald-website-review.
 
 ## Scope
 Public agency website plus private admin, Java 21 / Spring Boot 3.5.16 / PostgreSQL. Review RELEASE.md and DEPLOY.md before setup. This branch is not a production deployment.
@@ -29,3 +29,6 @@ One administrator, one API instance, no automatic enquiry email alerts, no 2FA o
 For each failure include: commit SHA, environment, reproduction steps, expected result, actual result, severity and redacted logs/screenshots. Never include passwords, cookies or customer information. Mark PASS / FAIL / NOT TESTED for each required check. Do not merge or deploy until blocking findings are resolved.
 
 Saved evidence in evidence/ is historical from the controlled test environment, not the result of your review. CI configuration is supplied; a successful remote run is still required.
+
+## Retest the reported defects
+Read RELEASE.md and evidence/review-provenance.json. Ignore archived evidence for 63870b1. Run `node tests/review-browser.cjs` with Playwright installed; it starts its own static server and tests public interactions using a CMS fixture. Run the live API/browser scripts against the real backend as well. Confirm the media Java source is tracked and present in the built JAR. Repeat the full visitor → enquiry → admin notes/status → restart → retained record and image journey.
