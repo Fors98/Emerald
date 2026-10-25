@@ -1,4 +1,4 @@
-# Emerald review corrections — 24 October 2026
+# Emerald review corrections — 25 October 2026
 
 The original 63870b1 release is not approved. Its upload evidence is withdrawn: media source was omitted by broad directory exclusions. Historical reports in archive/unverified-evidence-63870b1/ are not valid evidence for that commit.
 
@@ -11,16 +11,18 @@ The original 63870b1 release is not approved. Its upload evidence is withdrawn: 
 - Loader is hidden by default and survives blocked session storage.
 - Withdrawn mismatched evidence; fresh results are bound to a clean Git export.
 
-## Verification
-Tested code commit: 77d5135f173524c78a0c881fe9aa587f881155f0. See evidence/review-provenance.json for individual source hashes. Later evidence/documentation commits do not alter this tested implementation.
+## Independent review corrections
+- Navigation links focus their destination; short mobile menus can scroll.
+- No-JavaScript content and FAQ answers remain readable; the contact button stays disabled until handlers initialize.
+- Long portfolio descriptions expand the card without clipping.
+- Upload input streams close explicitly; truncated files and audit-failure cleanup have regression coverage.
 
-- Java 21 Maven clean verify: 31 tests, zero failures/errors.
-- Separate CRLF-formatted copy: 31 tests, zero failures/errors. This is a Linux simulation, not a native Windows execution.
-- Real PostgreSQL 16.9 and production Spring profile via Caddy local HTTPS: 29 API checks.
-- Chromium full workflow: 17 checks including image upload and mobile visitor enquiry followed up in admin.
-- Public review regression suite: 10 checks covering menu, FAQ, portfolio, no JavaScript and blocked storage.
-- Restart/HTTPS: 5 checks, including persisted enquiry notes/status, CMS assignment and byte-identical uploaded image after restart.
-- UI static audit: zero findings. JavaScript syntax passes. MediaController is present in the exported source and built executable JAR.
+## Verification
+Tested code commit: abf68736dcd3bd48e8ebafc7bb01388de9a15de9. Later evidence commits do not alter these tested sources. Individual hashes are in evidence/review-provenance.json.
+
+- Fresh Git export, Java 21 Maven clean verify: 33 tests, zero failures/errors.
+- Chromium public regression suite with mocked CMS: 13 checks passed.
+- Previous results for 77d5135 are explicitly retained under evidence/previous-77d5135/: 29 real API checks, 17 full browser checks and 5 restart/HTTPS checks, plus CRLF simulation. These have not been rerun against the latest code and are not current-release acceptance evidence.
 
 ## Remaining gates
-Aziz must retest the correction. Docker execution and public hosting are not verified here. Native Windows execution is configured in CI but not yet verified. No new full database/image disaster-recovery test was performed in this correction run. Physical-device performance and exhaustive security/accessibility remain unverified. Follow DEPLOY.md before launch.
+Aziz must retest the correction, including the complete real-backend visitor/admin/upload/restart journey on this exact revision. Docker execution and public hosting are not verified here. Native Windows execution is configured in CI but not yet verified. No new full database/image disaster-recovery test was performed in this correction run. Physical-device performance and exhaustive security/accessibility remain unverified. Follow DEPLOY.md before launch.

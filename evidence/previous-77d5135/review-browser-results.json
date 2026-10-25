@@ -1,0 +1,16 @@
+{
+  "scope": "Static server + mocked CMS response; Chromium",
+  "passed": 10,
+  "checks": [
+    "Closed menu cannot receive focus",
+    "Tab skips closed menu",
+    "Escape closes menu, restores focus and unlocks scrolling",
+    "Mobile-to-desktop resize closes menu and restores actual scrolling",
+    "Open menu keeps keyboard focus within navigation",
+    "Long published FAQ answer remains fully visible at mobile and desktop widths",
+    "Keyboard focus reveals full portfolio description",
+    "Disabled JavaScript leaves the loader hidden and website accessible",
+    "Blocked session storage does not break loader or menu initialization",
+    "No browser JavaScript errors"
+  ]
+}

@@ -1,7 +1,9 @@
 {
-  "testedCommit": "77d5135f173524c78a0c881fe9aa587f881155f0",
-  "date": "2026-10-24",
-  "method": "git archive of testedCommit into a fresh directory; Maven clean verify and runtime tests on that export",
+  "testedCommit": "abf68736dcd3bd48e8ebafc7bb01388de9a15de9",
+  "date": "2026-10-25",
+  "method": "Fresh git archive; Java 21 Maven clean verify; Chromium public regression suite with mocked CMS",
+  "backendTests": 33,
+  "browserChecks": 13,
   "sourceFilesSha256": {
     ".dockerignore": "04e2af653ab2503ba8eb288c928aec963fb72740eba266e88746fb098fbcea81",
     ".env.example": "b4b0ca209a6bcacd6cb76532cdcdf4faed6c9a2abbbbb8830b671eef63c66673",
@@ -50,7 +52,7 @@
     "backend/src/main/java/com/emerald/backend/content/SiteContent.java": "0ee39f9d5e3a9ccc69876e8d00f04ef5a20bdbc06397bab845e68b06eb1561f7",
     "backend/src/main/java/com/emerald/backend/content/SiteContentController.java": "b5e3dd900b943d236cf8756066b23495597dff7ad4e4cdb8273693c1103042f0",
     "backend/src/main/java/com/emerald/backend/content/SiteContentRepository.java": "c19ef0514355aee9675510c13e431e482828d6fb2770b0bd2c054bbdfc422fd6",
-    "backend/src/main/java/com/emerald/backend/media/MediaController.java": "7c9748ac5ee9f74b08c5dff78749200d30bad75eb31e5590fe9b35c482420fc8",
+    "backend/src/main/java/com/emerald/backend/media/MediaController.java": "84411104f69f6bc97820c0de2bb55b78862e0f60fe883d0c4313a7ade998a533",
     "backend/src/main/java/com/emerald/backend/security/AbuseFilter.java": "c28eacaca8cb4539758ed4ed954ce1ced0462f094cd11670d70f104d56dde37d",
     "backend/src/main/java/com/emerald/backend/security/AuthController.java": "4597ba4e77a0eec26167da6eca777e575d2fc4aba674c295e46493112edca692",
     "backend/src/main/java/com/emerald/backend/security/SecurityConfig.java": "948d0d3b20d0851c9a3a84859f5f210bd32d202ee7ec73f8764cc17ed892f85b",
@@ -62,7 +64,7 @@
     "backend/src/test/java/com/emerald/backend/contact/ContactControllerTest.java": "38a42f1febd1a9534e43a80ebecb42b5a1d704cc7edffa70a81f43df366c5019",
     "backend/src/test/java/com/emerald/backend/content/AdminSecurityTest.java": "8eae7fd3cf31b6a79e2bc50aaab302393c17e79e22c6d96bb5c64d7068198563",
     "backend/src/test/java/com/emerald/backend/content/ContentKeysTest.java": "a041f7a7ccceedf0bb6a749a40da0db31238ef083500d14232703ed06c7edbe8",
-    "backend/src/test/java/com/emerald/backend/media/MediaRoutesTest.java": "c451d355e71d812c5cf6ddda51aad5ad12dc4d7dde927d5d023933b50dc572d8",
+    "backend/src/test/java/com/emerald/backend/media/MediaRoutesTest.java": "14318a2f02da68f14f758f132416cbdd637e4d4deb1ee06142fc144f0ca29aab",
     "backend/src/test/resources/mockito-extensions/org.mockito.plugins.MockMaker": "8eca853a5a457f17e0479b71dfbe95f2a13aff9eeff250261ecdc8ca9b847a6a",
     "cms.js": "65f7d097860ce88a736d740568b6ebf65040c300a4239156ecaacf6d8c0c80b9",
     "compose.yaml": "e3ec7b2ac6eeae81040f97a15f842bc07b854ebc7e65c4fd950b95a9c9c75462",
@@ -73,32 +75,14 @@
     "deploy/Dockerfile.edge": "0802e627b1497b9e127ed47e9b53e3c32a140b0becda8a5f872b0703b22ef8f1",
     "deploy/backup.sh": "212b4e8230181ef318513cd8d88ae936e4fdbc82743266047f6f567aa986a1f9",
     "deploy/verify-restore.sh": "74aa292f0868c00de0d802151ce6f0f8fcf77a93a56cfbd04efaeb8b8570ce71",
-    "index.html": "6e6f38576b92cf24431537fb61cbaa49e7cf481a77644a7eb26ef7873b1c9303",
+    "index.html": "8a9197ee90671276c88eec5125b21c7ead3738c60d1c557b022a06cef9d02918",
     "premium-ui.json": "790a8a016ee0ac560473cb9eb50f8b005c609f7f2871a888af7d08c9d64bb0fd",
     "privacy.html": "061792d411d6120f15c4b6435a6fdce28ef678e6daebe950c1bce38f3c6d8e18",
-    "script.js": "09050debc490f33c15ad5de179da5f751b7967c86bc9cb69c2b168147ed8d3da",
-    "styles.css": "460514c03544d1661cee3ea2d47324bb3c790972e23f9a7811bb59a5fd195fd1",
+    "script.js": "b4e6c065721f976801bc6fd16501c9a92283d6223b87cdfdd5ac064a32432541",
+    "styles.css": "44f9dd877ecba47bf00117f2ba4acf414b1a6e12764d42f3643187e8fadc2958",
     "tests/browser.cjs": "1fc29e2a63167adcb93b6655e0b355ec8d2a2a94589ce398237e88270a115906",
     "tests/live_api.py": "93fc978849f5a7885d97ac891bd0635649f7c23307b3a614fc6ede289896310e",
-    "tests/review-browser.cjs": "fa1705549997d1c87edf9c752a84f427c8fb080a540fa629706c43c5b3b2581b"
+    "tests/review-browser.cjs": "92e41f4a3b0d84c4d777095da6f5567f45617aba1a810207efb8ea8ca07afe2d"
   },
-  "results": {
-    "backendTests": 31,
-    "backendFailures": 0,
-    "crlfFormattedBackendTests": 31,
-    "crlfFailures": 0,
-    "apiChecks": 29,
-    "fullBrowserChecks": 17,
-    "reviewBrowserChecks": 10,
-    "restartAndHttpsChecks": 5,
-    "staticAuditFindings": 0,
-    "packagedMediaController": "present in Git export and executable JAR"
-  },
-  "limitations": [
-    "CRLF simulation ran on Linux, not native Windows; native Windows CI is configured but not yet run",
-    "Docker image execution and public hosting remain unverified",
-    "No new full backup/restore test in this correction run",
-    "Local test CA; not a public production certificate",
-    "No claim of exhaustive accessibility, security or physical-device testing"
-  ]
+  "limitations": "Real PostgreSQL/API/admin journey and restart checks previously passed on 77d5135; not rerun on abf6873. Docker, public hosting and native Windows remain unverified."
 }
