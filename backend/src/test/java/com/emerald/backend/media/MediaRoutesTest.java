@@ -100,6 +100,22 @@ class MediaRoutesTest {
         mvc.perform(multipart("/admin/media").file("file", out.toByteArray()).with(user("admin").roles("ADMIN")).with(csrf()))
                 .andExpect(status().isBadRequest());
     }
+    @Test void truncatedImageRejected() throws Exception {
+        byte[] partial = java.util.Arrays.copyOf(picture("png"), 24);
+        mvc.perform(multipart("/admin/media").file("file", partial)
+                .with(user("admin").roles("ADMIN")).with(csrf())).andExpect(status().isBadRequest());
+        verifyNoInteractions(audit);
+    }
+    @Test void auditFailureLeavesNoPublishedOrTemporaryFile() throws Exception {
+        long before;
+        Files.createDirectories(media);
+        try (var files = Files.list(media)) { before = files.count(); }
+        doThrow(new IllegalStateException("Audit unavailable")).when(audit).record(anyString(), anyString(), anyString());
+        byte[] bytes = picture("png");
+        assertThrows(jakarta.servlet.ServletException.class, () -> mvc.perform(multipart("/admin/media")
+                .file("file", bytes).with(user("admin").roles("ADMIN")).with(csrf())));
+        try (var files = Files.list(media)) { assertEquals(before, files.count()); }
+    }
     @Test void invalidAndMissingNamesReturn404() throws Exception {
         mvc.perform(get("/media/not-a-file.png")).andExpect(status().isNotFound());
         mvc.perform(get("/media/00000000-0000-0000-0000-000000000000.png")).andExpect(status().isNotFound());

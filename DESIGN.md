@@ -11,3 +11,6 @@ styles.css owns public tokens and self-hosted Fraunces/Manrope fonts, with OFL l
 
 ## Layout and interaction
 1200px width, 40px desktop/20px mobile padding, one column below 640px. Native selects intentionally use OS popups. Visible focus, live status, busy buttons, empty/error states and reduced-motion support. JavaScript-dependent buttons remain disabled until handlers are installed. No secrets in browser storage.
+
+## Independent review corrections
+Content is visible without JavaScript; animation hides elements only after its observer is installed. Navigation transfers focus to the selected section. Closed menus are inert; short screens scroll within the menu. Portfolio cards preserve their aspect ratio for short text, but grow for longer published descriptions on focus/hover and touch. This deliberately prioritizes readable CMS content over a fixed card height.

@@ -38,7 +38,8 @@ public class MediaController {
         }
         BufferedImage decoded;
         String format;
-        try (ImageInputStream input = ImageIO.createImageInputStream(file.getInputStream())) {
+        try (var stream = file.getInputStream();
+             ImageInputStream input = ImageIO.createImageInputStream(stream)) {
             if (input == null) throw invalidImage();
             var readers = ImageIO.getImageReaders(input);
             if (!readers.hasNext()) throw invalidImage();

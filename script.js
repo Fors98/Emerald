@@ -297,6 +297,12 @@
         var target = document.querySelector(id);
         if (!target) return;
         e.preventDefault();
+        // Keep keyboard context at the selected section.
+        if (!target.hasAttribute("tabindex")) {
+          target.setAttribute("tabindex", "-1");
+          target.addEventListener("blur", function () { target.removeAttribute("tabindex"); }, { once: true });
+        }
+        target.focus({ preventScroll: true });
         var top = target.getBoundingClientRect().top + window.pageYOffset - 84;
         window.scrollTo({ top: top, behavior: prefersReducedMotion ? "auto" : "smooth" });
       });
@@ -321,7 +327,7 @@
         }
       });
     }, { threshold: 0.2, rootMargin: "0px 0px -60px 0px" });
-    els.forEach(function (el) { io.observe(el); });
+    els.forEach(function (el) { el.classList.add("reveal-pending"); io.observe(el); });
   })();
 
   /* ---------------------------------------------------------
@@ -384,6 +390,9 @@
     var items = document.querySelectorAll(".faq-item");
     items.forEach(function (item) {
       var btn = item.querySelector(".faq-q");
+      item.classList.add("faq-enhanced");
+      btn.setAttribute("aria-expanded", "false");
+      item.querySelector(".faq-a").setAttribute("aria-hidden", "true");
       btn.addEventListener("click", function () {
         var isOpen = btn.getAttribute("aria-expanded") === "true";
         items.forEach(function (i) {

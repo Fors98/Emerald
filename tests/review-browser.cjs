@@ -24,7 +24,7 @@ const server = http.createServer((req, res) => {
     const context = await browser.newContext({viewport:{width:390,height:844}, reducedMotion:'reduce'});
     const p = await context.newPage(); const errors = [];
     p.on('pageerror', e => errors.push(e.message));
-    await p.route('**/api/content', route => route.fulfill({json:{'faq.1.answer': 'A longer published answer. '.repeat(250)}}));
+    await p.route('**/api/content', route => route.fulfill({json:{'faq.1.answer': 'A longer published answer. '.repeat(250), 'portfolio.1.description': 'A detailed published project description. '.repeat(35)}}));
     await p.goto(base); await p.locator('#menuBtn').waitFor({state:'visible'});
     const menu = p.locator('#mobileMenu'), button = p.locator('#menuBtn');
     assert.equal(await menu.isVisible(), false);
@@ -51,6 +51,14 @@ const server = http.createServer((req, res) => {
     assert.equal(await button.evaluate(el => el === document.activeElement), true);
     await p.keyboard.press('Escape');
     checks.push('Open menu keeps keyboard focus within navigation');
+    await button.click(); await menu.locator('a[href="#contact"]').click();
+    assert.equal(await p.locator('#contact').evaluate(el => el === document.activeElement), true);
+    checks.push('Menu destination receives keyboard focus');
+    await p.setViewportSize({width:390,height:320});await button.click();
+    await menu.locator('a[href="#contact"]').click();
+    assert.equal(await p.locator('#contact').evaluate(el => el === document.activeElement), true);
+    checks.push('Mobile menu remains usable on a short landscape-height viewport');
+    await p.setViewportSize({width:390,height:844});
     await p.locator('.faq-q').first().click();
     const answer = p.locator('.faq-a').first();
     await p.waitForFunction(() => document.querySelector('.faq-a').clientHeight > 200);
@@ -62,12 +70,20 @@ const server = http.createServer((req, res) => {
     await card.focus(); assert.equal(await card.evaluate(el => el === document.activeElement), true);
     await p.waitForFunction(() => getComputedStyle(document.querySelector('.work-card p')).opacity === '1');
     assert.equal(await card.locator('p').evaluate(el => el.scrollHeight <= el.clientHeight + 1), true);
-    checks.push('Keyboard focus reveals full portfolio description');
+    assert.equal(await card.evaluate(el => {
+      const content = el.querySelector('p').getBoundingClientRect(), box = el.getBoundingClientRect();
+      return content.top >= box.top && content.bottom <= box.bottom;
+    }), true);
+    checks.push('Keyboard focus reveals full long portfolio description without card clipping');
     const nojs = await browser.newContext({javaScriptEnabled:false,viewport:{width:390,height:844}});
     const plain = await nojs.newPage(); await plain.goto(base);
     assert.equal(await plain.locator('#loader').isVisible(), false);
     assert.equal(await plain.locator('main').isVisible(), true);
     checks.push('Disabled JavaScript leaves the loader hidden and website accessible');
+    assert.equal(await plain.locator('.reveal').first().evaluate(el => getComputedStyle(el).opacity), '1');
+    assert.equal(await plain.locator('.faq-a').first().evaluate(el => el.clientHeight > 0 && el.getAttribute('aria-hidden') !== 'true'), true);
+    assert.equal(await plain.locator('#contactForm button[type="submit"]').isDisabled(), true);
+    checks.push('Without JavaScript, content and FAQ remain readable and submission is disabled');
     await nojs.close();
     const denied = await browser.newContext({reducedMotion:'reduce'});
     await denied.addInitScript(() => Object.defineProperty(window,'sessionStorage',{get(){throw new Error('Storage disabled');}}));
